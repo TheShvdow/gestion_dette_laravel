@@ -103,30 +103,31 @@ public function register(StoreUserRequest $request): JsonResponse
     ], 201);
 }
 
-// Méthode pour récupérer l'utilisateur avec la photo en base64
-public function getUser($id): JsonResponse
-{
-    $user = User::findOrFail($id);
 
-    // Convertir la photo en base64 si elle est présente
-    $photoBase64 = null;
-    if ($user->photo) {
-        $photoPath = public_path($user->photo); // Obtenez le chemin absolu du fichier
-        if (file_exists($photoPath)) {
-            $photoBase64 = base64_encode(file_get_contents($photoPath));
+/**
+     * Déconnecte l'utilisateur authentifié en révoquant son token.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            // Révoquer le token actuel de l'utilisateur
+            $request->user()->token()->revoke();
+
+            return response()->json([
+                'status' => 'SUCCESS',
+                'message' => 'Déconnexion réussie.'
+            ]);
         }
+
+        return response()->json([
+            'status' => 'ECHEC',
+            'message' => 'Aucun utilisateur authentifié.'
+        ], 401);
     }
-
-    return response()->json([
-        'status' => 'SUCCESS',
-        'data' => [
-            'user' => $user,
-            'photo_base64' => $photoBase64,
-        ],
-    ]);
-}
-
-
-
 
 }

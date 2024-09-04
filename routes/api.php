@@ -23,6 +23,9 @@ Route::middleware('auth:passport')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::apiResource('/clients', ClientController::class)->only(['index', 'store','show']);
+});
+
+Route::prefix('v1') -> middleware('auth:api','check.boutiquier')->group(function () {
     Route::apiResource('/articles', ArticleController::class)->only(['store','index','show']);
     Route::post('/articles/libelle', [ArticleController::class, 'findByLibelle']);
     Route::patch('articles/stock/{id}', [ArticleController::class, 'updateStock']);

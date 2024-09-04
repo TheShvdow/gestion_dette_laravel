@@ -73,7 +73,24 @@ class ClientController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+    // Convertir la photo en base64 si elle est présente
+    $photoBase64 = null;
+    if ($user->photo) {
+        $photoPath = public_path($user->photo); // Obtenez le chemin absolu du fichier
+        if (file_exists($photoPath)) {
+            $photoBase64 = base64_encode(file_get_contents($photoPath));
+        }
+    }
+
+    return response()->json([
+        'status' => 'SUCCESS',
+        'data' => [
+            'user' => $user,
+            'photo_base64' => $photoBase64,
+        ],
+    ]);
     }
 
 

@@ -10,9 +10,7 @@ use App\Models\Role;
 use App\Models\Client;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Http\JsonResponse;
-
-
-
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -49,8 +47,8 @@ class AuthController extends Controller
         'message' => 'Login successful',
     ], 200);
 }
-const CLIENT_ROLE_ID = 3;
 
+const CLIENT_ROLE_ID = 3;
 public function register(StoreUserRequest $request): JsonResponse
 {
     // Vérifier si le rôle CLIENT (id 3) existe
@@ -73,11 +71,12 @@ public function register(StoreUserRequest $request): JsonResponse
         ], 400);
     }
 
-    // Gérer la photo: convertir en base64 si elle est présente
-    $photoBase64 = null;
+    // Stocker le lien de la photo
+    $photoUrl = null;
     if ($request->hasFile('photo')) {
         $photo = $request->file('photo');
-        $photoBase64 = base64_encode(file_get_contents($photo->getRealPath()));
+        $photoPath = $photo->store('photos', 'public'); // Stocke la photo dans le répertoire 'storage/app/public/photos'
+        $photoUrl = Storage::url($photoPath); // Récupère l'URL publique de la photo
     }
 
     // Créer un nouvel utilisateur avec le rôle CLIENT
@@ -86,12 +85,12 @@ public function register(StoreUserRequest $request): JsonResponse
         'prenom' => $request->input('prenom'),
         'login' => $request->input('login'),
         'password' => Hash::make($request->input('password')),
-        'photo' => $photoBase64,
+        'photo' => $photoUrl,
         'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
     ]);
 
     // Mettre à jour le client avec l'ID de l'utilisateur créé
-    $client->user_id = $user->id; // Assurez-vous que la colonne 'user_id' existe dans la table 'clients'
+    $client->user_id = $user->id;
     $client->save();
 
     // Retourner une réponse JSON avec l'utilisateur créé
@@ -103,6 +102,30 @@ public function register(StoreUserRequest $request): JsonResponse
         ],
     ], 201);
 }
+
+// Méthode pour récupérer l'utilisateur avec la photo en base64
+public function getUser($id): JsonResponse
+{
+    $user = User::findOrFail($id);
+
+    // Convertir la photo en base64 si elle est présente
+    $photoBase64 = null;
+    if ($user->photo) {
+        $photoPath = public_path($user->photo); // Obtenez le chemin absolu du fichier
+        if (file_exists($photoPath)) {
+            $photoBase64 = base64_encode(file_get_contents($photoPath));
+        }
+    }
+
+    return response()->json([
+        'status' => 'SUCCESS',
+        'data' => [
+            'user' => $user,
+            'photo_base64' => $photoBase64,
+        ],
+    ]);
+}
+
 
 
 

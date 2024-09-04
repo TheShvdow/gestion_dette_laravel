@@ -58,7 +58,7 @@ class ClientController extends Controller
             }
             DB::commit();
             return $this->sendResponse(new ClientResource($client),);
-        }catch (Exception $e){
+        }catch (\Exception $e){
             DB::rollBack();
              return $this->sendResponse(new ClientResource($e->getMessage()),);
     }

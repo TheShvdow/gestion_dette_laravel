@@ -5,6 +5,16 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+
+
+/**
+ * @OA\Schema(
+ *     schema="ClientCollection",
+ *     type="array",
+ *     @OA\Items(ref="#/components/schemas/ClientResource")
+ * )
+ */
+
 class ClientCollection extends ResourceCollection
 {
     /**

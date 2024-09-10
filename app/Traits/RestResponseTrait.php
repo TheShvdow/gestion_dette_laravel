@@ -14,4 +14,12 @@ trait RestResponseTrait
             'message' => $message,
         ],$codeStatut);
     }
+    public function sendError($data, StateEnum $status = StateEnum::ECHEC, $message = 'Ressource non trouvée', $codeStatut = 404){
+
+        return response()->json([
+            'data' => $data,
+            'status' => $status->value,
+            'message' => $message
+        ], $codeStatut);
+    }
 }

@@ -9,6 +9,41 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
+/**
+ * @OA\Schema(
+ *     schema="User",
+ *     type="object",
+ *     required={"nom", "prenom", "login", "role"},
+ *     @OA\Property(
+ *         property="nom",
+ *         type="string",
+ *         example="John"
+ *     ),
+ *     @OA\Property(
+ *         property="prenom",
+ *         type="string",
+ *         example="Doe"
+ *     ),
+ *     @OA\Property(
+ *         property="login",
+ *         type="string",
+ *         example="johndoe"
+ *     ),
+ *     @OA\Property(
+ *         property="role",
+ *         type="string",
+ *         example="CLIENT"
+ *     ),
+ *     @OA\Property(
+ *         property="photo",
+ *         type="string",
+ *         example="/uploads/users/photo.jpg",
+ *         nullable=true
+ *     )
+ * )
+ */
+
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -53,7 +88,12 @@ class User extends Authenticatable
     }
 
     function role() {
-        return $this->belongsTo(Role::class,'role_id');
+        return $this->belongsTo(Role::class);
     }
 
+    public function hasRole($roleName)
+    {
+        return $this->role && $this->role->libelle === $roleName;
+    }
+    
 }

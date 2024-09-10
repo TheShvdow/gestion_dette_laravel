@@ -1,0 +1,285 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Gestion des dettes et créances",
+        "description": "Implementation of Swagger with in Laravel",
+        "contact": {
+            "email": "admin@admin.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:3000/api/v1",
+            "description": "Gestion des dettes et récues"
+        }
+    ],
+    "paths": {
+        "/clients": {
+            "get": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Get a list of clients",
+                "description": "Retourne une liste de clients qui ont un utilisateur lié",
+                "operationId": "af1f3794367a5e843bf15e3a9033d911",
+                "responses": {
+                    "200": {
+                        "description": "Liste des clients retournée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientCollection"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Requête invalide"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Créer un nouveau client",
+                "description": "Crée un nouveau client avec un utilisateur lié.",
+                "operationId": "15981a5da120d8b4ea1b91b05a35622b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreClientRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Client créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                }
+            }
+        },
+        "/clients/{id}": {
+            "get": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Obtenir les détails d'un utilisateur",
+                "description": "Renvoie les informations détaillées d'un utilisateur spécifique.",
+                "operationId": "2965e9737f628d15ea88209095622c24",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Utilisateur trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "SUCCESS"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/User"
+                                                },
+                                                "photo_base64": {
+                                                    "type": "string",
+                                                    "example": "base64encodedphoto"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouvé"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "StoreClientRequest": {
+                "required": [
+                    "surname",
+                    "adresse",
+                    "telephone",
+                    "user"
+                ],
+                "properties": {
+                    "surname": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "adresse": {
+                        "type": "string",
+                        "example": "123 Rue Principale"
+                    },
+                    "telephone": {
+                        "type": "string",
+                        "example": "0123456789"
+                    },
+                    "user": {
+                        "required": [
+                            "nom",
+                            "prenom",
+                            "login",
+                            "password",
+                            "role"
+                        ],
+                        "properties": {
+                            "nom": {
+                                "type": "string",
+                                "example": "John"
+                            },
+                            "prenom": {
+                                "type": "string",
+                                "example": "Doe"
+                            },
+                            "login": {
+                                "type": "string",
+                                "example": "johndoe"
+                            },
+                            "password": {
+                                "type": "string",
+                                "example": "Password123!"
+                            },
+                            "role": {
+                                "type": "string",
+                                "example": "CLIENT"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "ClientCollection": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/ClientResource"
+                }
+            },
+            "ClientResource": {
+                "title": "Client Resource",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "surname": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "adresse": {
+                        "type": "string",
+                        "example": "123 Rue Principale"
+                    },
+                    "telephone": {
+                        "type": "string",
+                        "example": "0123456789"
+                    }
+                },
+                "type": "object"
+            },
+            "Client": {
+                "required": [
+                    "Surname",
+                    "Telephone"
+                ],
+                "properties": {
+                    "Surname": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "Telephone": {
+                        "type": "number",
+                        "example": "77#######"
+                    },
+                    "Adresse": {
+                        "type": "string",
+                        "example": "123 Rue Principale"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "required": [
+                    "nom",
+                    "prenom",
+                    "login",
+                    "role"
+                ],
+                "properties": {
+                    "nom": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "prenom": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "login": {
+                        "type": "string",
+                        "example": "johndoe"
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "CLIENT"
+                    },
+                    "photo": {
+                        "type": "string",
+                        "example": "/uploads/users/photo.jpg",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "constants": {
+                "L5_SWAGGER_CONST_HOST": "http://127.0.0.1:3000/api/v1"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Clients",
+            "description": "Clients"
+        }
+    ]
+}

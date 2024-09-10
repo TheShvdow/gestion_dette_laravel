@@ -11,6 +11,40 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
+/**
+ * @OA\Schema(
+ *     schema="StoreClientRequest",
+ *     type="object",
+ *     required={"surname", "adresse", "telephone", "user"},
+ *     @OA\Property(
+ *         property="surname",
+ *         type="string",
+ *         example="Doe"
+ *     ),
+ *     @OA\Property(
+ *         property="adresse",
+ *         type="string",
+ *         example="123 Rue Principale"
+ *     ),
+ *     @OA\Property(
+ *         property="telephone",
+ *         type="string",
+ *         example="0123456789"
+ *     ),
+ *     @OA\Property(
+ *         property="user",
+ *         type="object",
+ *         required={"nom", "prenom", "login", "password", "role"},
+ *         @OA\Property(property="nom", type="string", example="John"),
+ *         @OA\Property(property="prenom", type="string", example="Doe"),
+ *         @OA\Property(property="login", type="string", example="johndoe"),
+ *         @OA\Property(property="password", type="string", example="Password123!"),
+ *         @OA\Property(property="role", type="string", example="CLIENT")
+ *     )
+ * )
+ */
+
+
 
 class StoreClientRequest extends FormRequest
 {
@@ -40,6 +74,7 @@ class StoreClientRequest extends FormRequest
             'user.prenom' => ['required_with:user','string'],
             'user.login' => ['required_with:user','string'],
             'user.password' => ['required_with:user', new CustumPasswordRule(),'confirmed'],
+            'user.role.libelle' => ['required_with:user','string'],
             
 
 

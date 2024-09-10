@@ -25,7 +25,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('/clients', ClientController::class)->only(['index', 'store','show']);
 });
 
-Route::prefix('v1') -> middleware('auth:api','check.boutiquier')->group(function () {
+Route::prefix('v1') -> middleware('auth:api','check.role:Boutiquier')->group(function () {
     Route::apiResource('/articles', ArticleController::class)->only(['store','index','show']);
     Route::post('/articles/libelle', [ArticleController::class, 'findByLibelle']);
     Route::patch('articles/stock/{id}', [ArticleController::class, 'updateStock']);
@@ -44,6 +44,5 @@ Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
     Route::middleware('auth:api')->post('/register', [AuthController::class, 'register']);
-    
-    
+    Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
 });

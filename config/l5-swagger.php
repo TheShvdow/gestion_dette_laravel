@@ -121,22 +121,26 @@ return [
         */
         'securityDefinitions' => [
             'securitySchemes' => [
-                /*
-                 * Exemples de schémas de sécurité
-                 */
-                'constants' => [
-                    'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://mon-hôte-par-défaut.com'),
+                'bearerAuth' => [
+                    'type' => 'http',
+                    'scheme' => 'bearer',
+                     // Optionnel, indique que le token est de type passport
+
                 ],
             ],
             'security' => [
-                /*
-                 * Exemples de sécurités
-                 */
                 [
-                    // Exemple : 'passport' => []
+                    'bearerAuth' => [
+                        // Utiliser ce schéma pour sécuriser les routes
+                        'type' => 'apiKey',
+                        'name' => 'Authorization',
+                        'in' => 'header',
+                        
+                    ] // Utilisation de ce schéma pour sécuriser les routes
                 ],
             ],
         ],
+
 
         /*
          * Régénérer la documentation à chaque demande en mode développement

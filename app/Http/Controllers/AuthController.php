@@ -2,210 +2,175 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\Client;
+use Lcobucci\JWT\Builder;
 use Illuminate\Http\Request;
+use Lcobucci\JWT\Signer\Key;
+use App\Traits\RestResponseTrait;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Client;
-use App\Http\Requests\StoreUserRequest;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Crypt;
-use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\Signer\Key;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
+use App\Http\Requests\StoreUserRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use App\Services\Interfaces\AuthentificationServiceInterface;
+use App\Enums\StateEnum;
 
 class AuthController extends Controller
 {
+    const CLIENT_ROLE_ID = 3;
+    use RestResponseTrait;  
+    protected $authService;
 
+    public function __construct(AuthentificationServiceInterface $authService){
+        $this->authService = $authService;
+    }
+
+
+    /**
+     * @OA\Post(
+     *     path="/login",
+     *     summary="Authentification d'un utilisateur",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"login", "password"},
+     *             @OA\Property(property="login", type="string", example="donnelly.isabel"),
+     *             @OA\Property(property="password", type="string", example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Connexion réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="eyJhbGci..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Échec de l'authentification",
+     *     )
+     * )
+     */
 
 public function login(Request $request)
-{
-    // Validation des données de la requête
-    $request->validate([
-        'login' => 'required|string',
-        'password' => 'required|string|min:6',
-    ]);
-
-    // Tenter de se connecter
-    $credentials = ['login' => $request->login, 'password' => $request->password];
-
-    if (!Auth::attempt($credentials)) {
-        return response()->json([
-            'status' => 401,
-            'data' => null,
-            'message' => 'Invalid credentials',
-        ], 401);
+    {
+        $validator = Validator::make($request->all(), [
+            'login' => 'required|string',
+            'password' => 'required|string',
+        ]);
+        if ($validator->fails()) 
+            return $this->sendResponse(['errors' => $validator->errors()], StateEnum::ECHEC, "Donnée erroné'", 422);
+        try {
+            $token = $this->authService->authentificate($request->only('login', 'password'))["token"];
+            
+               
+            return $this->sendResponse(['token' => $token, 'token_type' => 'Bearer' ], message: "Connexion réussie");
+        } catch (\Exception $e) {
+            return $this->sendResponse(null, StateEnum::ECHEC, "Échec de l'authentification'", 401);
+        }
     }
+/**
+ * @OA\Post(
+ *     path="/register",
+ *     tags={"Authentification"},
+ *     summary="Register a new user",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 type="object",
+ *                 required={"nom", "prenom", "login", "password", "password_confirmation", "client_id", "roleId"},
+ *                 @OA\Property(property="nom", type="string", example="Doe"),
+ *                 @OA\Property(property="prenom", type="string", example="John"),
+ *                 @OA\Property(property="login", type="string", example="johndoe"),
+ *                 @OA\Property(property="password", type="string", format="password", example="securepassword123"),
+ *                 @OA\Property(property="password_confirmation", type="string", format="password", example="securepassword123"),
+ *                 @OA\Property(property="client_id", type="string", example="12345"),
+ *                 @OA\Property(property="roleId", type="integer", example=1),
+ *                 @OA\Property(property="photo", type="string", format="binary"),
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="User registered successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="user", ref="#/components/schemas/User"),
+ *                 @OA\Property(property="token", type="string")
+ *             ),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=400, description="Invalid input"),
+ *     @OA\Response(response=409, description="User already exists")
+ * )
+ */
 
-    // Si la connexion réussit, générer un token Passport (qui sera un JWT)
-    /** @var \App\Models\User $user **/
-    $user = Auth::user();
 
-    // Créer un token Passport
-    $tokenResult = $user->createToken('Personal Access Token');
-    $accessToken = $tokenResult->accessToken; // Le JWT généré
-    $refreshToken = $tokenResult->token->id; // Le token de rafraîchissement
 
-    // Retourner le JWT dans la réponse
-    return response()->json([
-        'status' => 200,
-        'data' => [
-            'token' => $accessToken,
-            'refresh_token' => $refreshToken,
-            'token_type' => 'Bearer',
-            'expires_in' => $tokenResult->token->expires_at->diffInSeconds(now()), // Temps d'expiration du token
-        ],
-        'message' => 'Login successful',
-    ], 200);
-}
+ public function register(StoreUserRequest $request): JsonResponse
+ {
+     // Vérifier si le rôle CLIENT (id 3) existe
+     $role = Role::find(self::CLIENT_ROLE_ID);
+     if (!$role) {
+         return response()->json([
+             'status' => 'ECHEC',
+             'message' => 'Le rôle spécifié n\'existe pas.'
+         ], 400);
+     }
 
-// public function login(Request $request)
-// {
-//     // Validation des données de la requête
-//     $request->validate([
-//         'login' => 'required|string',
-//         'password' => 'required|string|min:6',
-//     ]);
+     // Vérifier si le client spécifié existe
+     $client = Client::find($request->input('client_id'));
+     if (!$client) {
+         return response()->json([
+             'status' => 'ECHEC',
+             'message' => 'Le client spécifié n\'existe pas.'
+         ], 400);
+     }
 
-//     // Tenter de se connecter avec les identifiants
-//     $credentials = ['login' => $request->login, 'password' => $request->password];
+     // Stocker le lien de la photo si elle est fournie
+     $photoUrl = null;
+     if ($request->hasFile('photo')) {
+         $photo = $request->file('photo');
+         $photoPath = $photo->store('photos', 'public'); // Stocke la photo dans le répertoire 'storage/app/public/photos'
+         $photoUrl = Storage::url($photoPath); // Récupère l'URL publique de la photo
+     }
+        //dd($request->all());
+     // Créer un nouvel utilisateur avec le rôle CLIENT
+     $user = User::create([
+         'nom' => $request->input('nom'),
+         'prenom' => $request->input('prenom'),
+         'login' => $request->input('login'),
+         'password' => Hash::make($request->input('password')??"password01234@"),
+         'photo' => $photoUrl,
+         'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
+     ]);
 
-//     if (!Auth::attempt($credentials)) {
-//         return response()->json([
-//             'status' => 401,
-//             'data' => null,
-//             'message' => 'Invalid credentials',
-//         ], 401);
-//     }
+     // Mettre à jour le client avec l'ID de l'utilisateur créé
+     $client->user_id = $user->id;
+     $client->save();
 
-//     // Si la connexion réussit, récupérer l'utilisateur connecté
-//     /** @var \App\Models\User $user **/
-//     $user = Auth::user();
-
-//     // Chiffrer les informations utilisateur que tu veux stocker dans le JWT
-//     $encryptedData = Crypt::encrypt([
-//         'id' => $user->id,
-//         'email' => $user->email,
-//         'login' => $user->login,
-//     ]);
-
-//     // Créer un JWT personnalisé avec lcobucci/jwt
-//     $signer = new Sha256();
-//     $key = new Key('Cybershvdow10@'); // Remplace par une clé secrète forte
-//     $now = Carbon::now();
-
-//     $token = (new Builder())
-//         ->issuedBy(config('app.url')) // L'émetteur du token (ton application)
-//         ->permittedFor(config('app.url')) // L'audience du token (ton application)
-//         ->issuedAt($now->timestamp) // Date d'émission
-//         ->expiresAt($now->addMinutes(60)->timestamp) // Date d'expiration
-//         ->withClaim('encryptedData', $encryptedData) // Ajoute les données chiffrées dans le payload
-//         ->getToken($signer, $key); // Générer le token signé
-
-//     // Retourner le JWT dans la réponse
-//     return response()->json([
-//         'status' => 200,
-//         'data' => [
-//             'token' => (string) $token, // Le JWT généré
-//             'token_type' => 'Bearer',
-//             'expires_in' => 3600, // Temps d'expiration du token en secondes
-//         ],
-//         'message' => 'Login successful',
-//     ], 200);
-// }
-
-    public function refreshToken(Request $request)
-{
-    $request->validate([
-        'refresh_token' => 'required',
-    ]);
-
-    $refreshTokenId = $request->input('refresh_token');
-     /** @var \App\Models\User $user **/
-    $user = Auth::user();
-
-    $userToken = $user->tokens()->where('id', $refreshTokenId)->first();
-
-    if (!$userToken) {
-        return response()->json([
-            'status' => 'ECHEC',
-            'message' => 'Token de rafraîchissement invalide.',
-        ], 401);
-    }
-
-    // Crée un nouveau token d'accès
-    $newToken = $user->createToken('Personal Access Token');
-    $accessToken = $newToken->accessToken;
-
-    return response()->json([
-        'status' => 200,
-        'data' => [
-            'token' => $accessToken,
-            'refresh_token' => $newToken->token->id,
-            'token_type' => 'Bearer',
-            'expires_in' => $newToken->token->expires_at->diffInSeconds(now()),
-        ],
-        'message' => 'Token rafraîchi avec succès.',
-    ], 200);
-}
-
-const CLIENT_ROLE_ID = 3;
-public function register(StoreUserRequest $request): JsonResponse
-{
-    // Vérifier si le rôle CLIENT (id 3) existe
-    $role = Role::find(self::CLIENT_ROLE_ID);
-
-    if (!$role) {
-        return response()->json([
-            'status' => 'ECHEC',
-            'message' => 'Le rôle spécifié n\'existe pas.'
-        ], 400);
-    }
-
-    // Vérifier si le client spécifié existe
-    $client = Client::find($request->input('client_id'));
-
-    if (!$client) {
-        return response()->json([
-            'status' => 'ECHEC',
-            'message' => 'Le client spécifié n\'existe pas.'
-        ], 400);
-    }
-
-    // Stocker le lien de la photo
-    $photoUrl = null;
-    if ($request->hasFile('photo')) {
-        $photo = $request->file('photo');
-        $photoPath = $photo->store('photos', 'public'); // Stocke la photo dans le répertoire 'storage/app/public/photos'
-        $photoUrl = Storage::url($photoPath); // Récupère l'URL publique de la photo
-    }
-
-    // Créer un nouvel utilisateur avec le rôle CLIENT
-    $user = User::create([
-        'nom' => $request->input('nom'),
-        'prenom' => $request->input('prenom'),
-        'login' => $request->input('login'),
-        'password' => Hash::make($request->input('password')),
-        'photo' => $photoUrl,
-        'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
-    ]);
-
-    // Mettre à jour le client avec l'ID de l'utilisateur créé
-    $client->user_id = $user->id;
-    $client->save();
-
-    // Retourner une réponse JSON avec l'utilisateur créé
-    return response()->json([
-        'status' => 'SUCCESS',
-        'data' => [
-            'user' => $user,
-            'client' => $client
-        ],
-    ], 201);
-}
+     // Retourner une réponse JSON avec l'utilisateur créé
+     return response()->json([
+         'status' => 'SUCCESS',
+         'data' => [
+             'client' => $client,
+             'user' => $user
+         ],
+     ], 201);
+ }
 
 
 /**
@@ -214,24 +179,33 @@ public function register(StoreUserRequest $request): JsonResponse
      * @param Request $request
      * @return JsonResponse
      */
-    public function logout(Request $request): JsonResponse
+
+
+    /**
+     * @OA\Post(
+     *     path="/logout",
+     *     tags={"Users"},
+     *     summary="Déconnexion de l'utilisateur",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Déconnexion réussie"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur lors de la déconnexion"
+     *     )
+     * )
+     */
+    public function logout(Request $request)
     {
-        $user = Auth::user();
-
-        if ($user) {
-            // Révoquer le token actuel de l'utilisateur
-            $request->user()->token()->revoke();
-
-            return response()->json([
-                'status' => 'SUCCESS',
-                'message' => 'Déconnexion réussie.'
-            ]);
+        try {
+            $this->authService->logout($request->user());
+            return $this->sendResponse(null, message: "Déconnexion réussie");
+        } catch (\Exception $e) {
+            return $this->sendResponse(null, StateEnum::ECHEC, "Erreur lors de la déconnexion", 500);
         }
-
-        return response()->json([
-            'status' => 'ECHEC',
-            'message' => 'Aucun utilisateur authentifié.'
-        ], 401);
     }
 
 }

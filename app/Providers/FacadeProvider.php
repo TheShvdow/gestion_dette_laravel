@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\services\interfaces\RoleServiceInterface;
+use App\Services\Interfaces\RoleServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class FacadeProvider extends ServiceProvider

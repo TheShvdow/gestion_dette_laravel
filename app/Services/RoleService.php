@@ -1,8 +1,8 @@
 <?php
 
-namespace App\services;
+namespace App\Services;
 
-use App\services\interfaces\RoleServiceInterface;
+use App\Services\Interfaces\RoleServiceInterface;
 use App\Repository\Interface\RoleRepositoryInterface;
 
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\services\interfaces;
+namespace App\Services\Interfaces;
 
 interface RoleServiceInterface
 {

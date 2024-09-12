@@ -171,6 +171,9 @@ return [
         App\Providers\ServicesProvider::class,
         App\Providers\RepositoriesProvider::class,
         App\Providers\FacadeProvider::class,
+        App\Providers\AuthCustomServiceProvider::class,
+        CloudinaryLabs\CloudinaryLaravel\CloudinaryServiceProvider::class,
+        
     
     ])->toArray(),
 
@@ -187,6 +190,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Cloudinary' => CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::class,
     ])->toArray(),
 
 ];

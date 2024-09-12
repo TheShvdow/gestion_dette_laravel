@@ -18,8 +18,8 @@ class UserResource extends JsonResource
             'nom' => $this->nom,
             'prenom' => $this->prenom,
             'login' => $this->login,
-            'role' => $this->role->libelle ?? 'Aucun role',
-            'photo' => $this->photo
+            'photo' => $this->photo,
+            'roleId' => $this->roleId
 
         ];
     }

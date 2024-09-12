@@ -15,7 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *         @OA\Property(property="id", type="integer", example=1),
  *         @OA\Property(property="surname", type="string", example="Doe"),
  *         @OA\Property(property="adresse", type="string", example="123 Rue Principale"),
- *         @OA\Property(property="telephone", type="string", example="0123456789")
+ *         @OA\Property(property="telephone", type="string", example="778275234")
  *     }
  * )
  */
@@ -30,7 +30,11 @@ class ClientResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            
             'nom' => $this->surname,
+            'prenom' => $this->name,
+            'adresse' => $this->adresse,
+            'telephone' => $this->telephone,
             'user' => new UserResource($this->whenLoaded('user')),
         ];
     }

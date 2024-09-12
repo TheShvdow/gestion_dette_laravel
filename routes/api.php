@@ -43,6 +43,6 @@ Route::middleware('auth:api')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
-    Route::middleware('auth:api')->post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
 });

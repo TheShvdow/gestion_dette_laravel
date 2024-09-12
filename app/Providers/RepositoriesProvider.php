@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Repository\RoleRepository;
+use App\Repository\ArticleRepository;
 use Illuminate\Support\ServiceProvider;
 use App\Repository\Interface\RoleRepositoryInterface;
+use App\Repository\Interface\ArticleRepositoryInterface;
      
 
 class RepositoriesProvider extends ServiceProvider
@@ -15,7 +17,10 @@ class RepositoriesProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            RoleRepositoryInterface::class,RoleRepository::class
+            RoleRepositoryInterface::class,RoleRepository::class,
+        );
+        $this->app->bind(
+            ArticleRepositoryInterface::class,ArticleRepository::class,
         );
     }
 

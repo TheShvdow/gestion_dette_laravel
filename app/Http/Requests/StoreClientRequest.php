@@ -29,17 +29,17 @@ use Illuminate\Http\Exceptions\HttpResponseException;
  *     @OA\Property(
  *         property="telephone",
  *         type="string",
- *         example="0123456789"
+ *         example="771234567"
  *     ),
  *     @OA\Property(
  *         property="user",
  *         type="object",
- *         required={"nom", "prenom", "login", "password", "role"},
+ *         required={"nom", "prenom", "login", "password", "roleId"},
  *         @OA\Property(property="nom", type="string", example="John"),
  *         @OA\Property(property="prenom", type="string", example="Doe"),
  *         @OA\Property(property="login", type="string", example="johndoe"),
  *         @OA\Property(property="password", type="string", example="Password123!"),
- *         @OA\Property(property="role", type="string", example="CLIENT")
+ *         @OA\Property(property="roleId", type="integer", example="3")
  *     )
  * )
  */
@@ -67,17 +67,14 @@ class StoreClientRequest extends FormRequest
         $rules = [
             'surname' => ['required', 'string', 'max:255','unique:clients,surname'],
             'address' => ['string', 'max:255'],
-            'telephone' => ['required',new TelephoneRule()],
+            'telephone' => ['required',new TelephoneRule()],'unique:clients,telephone',
 
             'user' => ['sometimes','array'],
             'user.nom' => ['required_with:user','string'],
             'user.prenom' => ['required_with:user','string'],
             'user.login' => ['required_with:user','string'],
             'user.password' => ['required_with:user', new CustumPasswordRule(),'confirmed'],
-            'user.role.libelle' => ['required_with:user','string'],
-            
-
-
+            'user.roleId' => ['required_with:user','integer']
         ];
 /*
         if ($this->filled('user')) {
@@ -98,6 +95,7 @@ class StoreClientRequest extends FormRequest
     {
         return [
             'surname.required' => "Le surnom est obligatoire.",
+            'telephone.required' => "Le numéro de téléphone est obligatoire.",
         ];
     }
 

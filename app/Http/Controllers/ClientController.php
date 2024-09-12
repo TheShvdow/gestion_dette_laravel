@@ -41,7 +41,7 @@ class ClientController extends Controller
         $data = Client::with($include)->whereNotNull('user_id')->get();
         $clients = QueryBuilder::for(Client::class)
             ->allowedFilters(['surname'])
-            ->allowedIncludes(['user'])
+            ->allowedIncludes(['user','client'])
             ->get();
         return new ClientCollection($clients);
     }
@@ -81,7 +81,7 @@ public function store(StoreClientRequest $request)
                 'prenom' => $request->input('user.prenom'),
                 'login' => $request->input('user.login'),
                 'password' => bcrypt($request->input('user.password')), // Assurez-vous que le mot de passe est haché
-                'role' => $request->input('user.role'),
+                'roleId' => $request->input('user.roleId'),
             ]);
 
             $user->client()->save($client);

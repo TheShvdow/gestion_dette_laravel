@@ -14,10 +14,58 @@ class ArticleController extends Controller
      * Display a listing of the resource.
      */
 
-    //  public function __construct()
-    // {
-    //     $this->middleware('auth:api');
-    // }
+     public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->middleware('check.role:Boutiquier');
+    }
+
+    /**
+     * @OA\Info(title="Article API", version="1.0")
+     * 
+     * @OA\SecurityScheme(
+     *     securityScheme="bearerAuth",
+     *     type="http",
+     *     scheme="bearer"
+     * )
+     */
+
+   /**
+ * @OA\Get(
+ *     path="/articles",
+ *     tags={"Articles"},
+ *     summary="List all articles",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         description="Number of items per page",
+ *         @OA\Schema(type="integer", default=10)
+ *     ),
+ *     @OA\Parameter(
+ *         name="disponible",
+ *         in="query",
+ *         description="Filter by availability",
+ *         @OA\Schema(type="string", enum={"oui", "non"})
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of articles",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="array",
+ *                 @OA\Items(ref="#/components/schemas/Article")
+ *             ),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="No articles found")
+ * )
+ */
+
     public function index(Request $request) : JsonResponse
     {
         $perPage = $request->input('per_page', 10);
@@ -52,6 +100,36 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+     /**
+ * @OA\Post(
+ *     path="/articles",
+ *     tags={"Articles"},
+ *     summary="Store a newly created article",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         description="Article object that needs to be added",
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="libelle", type="string"),
+ *             @OA\Property(property="prix", type="number", format="float"),
+ *             @OA\Property(property="quantite", type="integer", example=100)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Article created successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", ref="#/components/schemas/Article"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=400, description="Invalid input")
+ * )
+ */
     public function store(StoreArticleRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -70,6 +148,33 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
+
+   /**
+ * @OA\Get(
+ *     path="/articles/{id}",
+ *     tags={"Articles"},
+ *     summary="Get an article by ID",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the article to retrieve",
+ *         @OA\Schema(type="integer", format="int64", example=1)
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Article details",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", ref="#/components/schemas/Article"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Article not found")
+ * )
+ */
     public function show(int $id)
     {
         $article = Article::find($id);
@@ -114,6 +219,33 @@ class ArticleController extends Controller
     {
         //
     }
+
+    /**
+ * @OA\Get(
+ *     path="/articles/findByLibelle",
+ *     tags={"Articles"},
+ *     summary="Find an article by its libelle",
+ *     @OA\Parameter(
+ *         name="libelle",
+ *         in="query",
+ *         description="The libelle of the article to find",
+ *         required=true,
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Article found",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", ref="#/components/schemas/Article"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Article not found"),
+ *     @OA\Response(response=400, description="Bad Request")
+ * )
+ */
     public function findByLibelle(Request $request): JsonResponse
     {
         $request->validate([
@@ -137,6 +269,42 @@ class ArticleController extends Controller
             'message' => 'Article trouvé avec succès'
         ], 200);
     }
+
+  /**
+ * @OA\Patch(
+ *     path="/articles/{id}/stock",
+ *     tags={"Articles"},
+ *     summary="Update stock quantity of an article",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the article to update",
+ *         @OA\Schema(type="integer", format="int64", example=1)
+ *     ),
+ *     @OA\RequestBody(
+ *         description="Stock quantity to be updated",
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="quantite", type="integer", example=10)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Stock updated successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", ref="#/components/schemas/Article"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=400, description="Invalid input"),
+ *     @OA\Response(response=404, description="Article not found")
+ * )
+ */
     public function updateStock(Request $request, $id): JsonResponse
     {
         // Validate the incoming request
@@ -167,6 +335,43 @@ class ArticleController extends Controller
         ], 200);
     }
 
+   /**
+ * @OA\Patch(
+ *     path="/articles/stocks",
+ *     tags={"Articles"},
+ *     summary="Update stock quantities for multiple articles",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         description="List of articles with stock updates",
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="array",
+ *             @OA\Items(
+ *                 type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="quantite", type="integer", example=10)
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Stocks updated successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="object",
+ *                 @OA\Property(property="updated", type="array", @OA\Items(ref="#/components/schemas/Article")),
+ *                 @OA\Property(property="failed", type="array", @OA\Items(type="object"))
+ *             ),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=400, description="Validation errors"),
+ *     @OA\Response(response=404, description="No articles updated")
+ * )
+ */
     public function updateMultipleStocks(Request $request): JsonResponse
 {
     // Initialize arrays to hold results
@@ -231,6 +436,32 @@ class ArticleController extends Controller
     return response()->json($response, $response['status']);
 }
 
+/**
+ * @OA\Delete(
+ *     path="/articles/{id}",
+ *     tags={"Articles"},
+ *     summary="Delete an article by ID",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the article to delete",
+ *         @OA\Schema(type="integer", format="int64", example=1)
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Article deleted successfully",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", type="null"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Article not found")
+ * )
+ */
 public function deleteArticle($id)
 {
     $article = Article::find($id);
@@ -251,6 +482,32 @@ public function deleteArticle($id)
         'message' => 'Article supprimé avec succès'
     ]);
 }
+
+/**
+ * @OA\Patch(
+ *     path="/articles/restore/{id}",
+ *     tags={"Articles"},
+ *     summary="Restore a soft-deleted article",
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         description="ID of the article to restore",
+ *         required=true,
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Article restored",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="data", ref="#/components/schemas/Article"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ),
+ *     @OA\Response(response=404, description="Article not found")
+ * )
+ */
 public function restoreArticle($id)
 {
     $article = Article::withTrashed()->find($id);

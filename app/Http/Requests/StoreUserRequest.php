@@ -35,7 +35,8 @@ class StoreUserRequest extends FormRequest
           //  'email' => 'required|email|unique:users,email',
             'password' =>['confirmed', new CustumPasswordRule()],
             //roles is taken in the User model by using the role_id foreign key
-            'photo' => 'nullable|image',        
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'storage_mode' => 'required|in:base64,cloudinary',       
             'role.libelle' => ['required_with:role','string'],
            
         ];

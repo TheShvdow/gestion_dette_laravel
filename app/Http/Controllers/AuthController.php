@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Interfaces\AuthentificationServiceInterface;
 use App\Enums\StateEnum;
+use App\Services\Interfaces\FileStorageServiceInterface;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -70,9 +72,12 @@ public function login(Request $request)
             return $this->sendResponse(['errors' => $validator->errors()], StateEnum::ECHEC, "Donnée erroné'", 422);
         try {
             $token = $this->authService->authentificate($request->only('login', 'password'))["token"];
+            $refreshToken = $this->authService->authentificate($request->only('login', 'password'))["refresh_token"];
+            
+            
             
                
-            return $this->sendResponse(['token' => $token, 'token_type' => 'Bearer' ], message: "Connexion réussie");
+            return $this->sendResponse(['token' => $token, 'token_type' => 'Bearer','refresh_token' => $refreshToken ], message: "Connexion réussie");
         } catch (\Exception $e) {
             return $this->sendResponse(null, StateEnum::ECHEC, "Échec de l'authentification'", 401);
         }
@@ -119,58 +124,111 @@ public function login(Request $request)
  */
 
 
+ public function register(StoreUserRequest $request, FileStorageServiceInterface $fileStorageService): JsonResponse
+{
+    // Vérifier si le rôle CLIENT (id 3) existe
+    $role = Role::find(self::CLIENT_ROLE_ID);
 
- public function register(StoreUserRequest $request): JsonResponse
- {
-     // Vérifier si le rôle CLIENT (id 3) existe
-     $role = Role::find(self::CLIENT_ROLE_ID);
-     if (!$role) {
-         return response()->json([
-             'status' => 'ECHEC',
-             'message' => 'Le rôle spécifié n\'existe pas.'
-         ], 400);
-     }
+    if (!$role) {
+        return response()->json([
+            'status' => 'ECHEC',
+            'message' => 'Le rôle spécifié n\'existe pas.'
+        ], 400);
+    }
 
-     // Vérifier si le client spécifié existe
-     $client = Client::find($request->input('client_id'));
-     if (!$client) {
-         return response()->json([
-             'status' => 'ECHEC',
-             'message' => 'Le client spécifié n\'existe pas.'
-         ], 400);
-     }
+    // Vérifier si le client spécifié existe
+    $client = Client::find($request->input('client_id'));
 
-     // Stocker le lien de la photo si elle est fournie
-     $photoUrl = null;
-     if ($request->hasFile('photo')) {
-         $photo = $request->file('photo');
-         $photoPath = $photo->store('photos', 'public'); // Stocke la photo dans le répertoire 'storage/app/public/photos'
-         $photoUrl = Storage::url($photoPath); // Récupère l'URL publique de la photo
-     }
-        //dd($request->all());
-     // Créer un nouvel utilisateur avec le rôle CLIENT
-     $user = User::create([
-         'nom' => $request->input('nom'),
-         'prenom' => $request->input('prenom'),
-         'login' => $request->input('login'),
-         'password' => Hash::make($request->input('password')??"password01234@"),
-         'photo' => $photoUrl,
-         'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
-     ]);
+    if (!$client) {
+        return response()->json([
+            'status' => 'ECHEC',
+            'message' => 'Le client spécifié n\'existe pas.'
+        ], 400);
+    }
 
-     // Mettre à jour le client avec l'ID de l'utilisateur créé
-     $client->user_id = $user->id;
-     $client->save();
+    // Stocker le lien de la photo
+    $photoUrl = null;
+    if ($request->hasFile('photo')) {
+        $photo = $request->file('photo');
+        $photoUrl = $fileStorageService->upload($photo, 'photos');
+    }
 
-     // Retourner une réponse JSON avec l'utilisateur créé
-     return response()->json([
-         'status' => 'SUCCESS',
-         'data' => [
-             'client' => $client,
-             'user' => $user
-         ],
-     ], 201);
- }
+    // Créer un nouvel utilisateur avec le rôle CLIENT
+    $user = User::create([
+        'nom' => $request->input('nom'),
+        'prenom' => $request->input('prenom'),
+        'login' => $request->input('login'),
+        'password' => Hash::make($request->input('password')),
+        'photo' => $photoUrl,
+        'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
+    ]);
+
+    // Mettre à jour le client avec l'ID de l'utilisateur créé
+    $client->user_id = $user->id;
+    $client->save();
+
+    // Retourner une réponse JSON avec l'utilisateur créé
+    return response()->json([
+        'status' => 'SUCCESS',
+        'data' => [
+            'user' => $user,
+            'client' => $client
+        ],
+    ], 201);
+}
+
+
+//  public function register(StoreUserRequest $request): JsonResponse
+//  {
+//      // Vérifier si le rôle CLIENT (id 3) existe
+//      $role = Role::find(self::CLIENT_ROLE_ID);
+//      if (!$role) {
+//          return response()->json([
+//              'status' => 'ECHEC',
+//              'message' => 'Le rôle spécifié n\'existe pas.'
+//          ], 400);
+//      }
+
+//      // Vérifier si le client spécifié existe
+//      $client = Client::find($request->input('client_id'));
+//      if (!$client) {
+//          return response()->json([
+//              'status' => 'ECHEC',
+//              'message' => 'Le client spécifié n\'existe pas.'
+//          ], 400);
+//      }
+
+//      // Stocker le lien de la photo si elle est fournie
+//      $photoUrl = null;
+//      if ($request->hasFile('photo')) {
+//          $photo = $request->file('photo');
+//          $photoPath = $photo->store('photos', 'public'); // Stocke la photo dans le répertoire 'storage/app/public/photos'
+//          $photoUrl = Storage::url($photoPath); // Récupère l'URL publique de la photo
+//      }
+//         //dd($request->all());
+//      // Créer un nouvel utilisateur avec le rôle CLIENT
+//      $user = User::create([
+//          'nom' => $request->input('nom'),
+//          'prenom' => $request->input('prenom'),
+//          'login' => $request->input('login'),
+//          'password' => Hash::make($request->input('password')??"password01234@"),
+//          'photo' => $photoUrl,
+//          'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
+//      ]);
+
+//      // Mettre à jour le client avec l'ID de l'utilisateur créé
+//      $client->user_id = $user->id;
+//      $client->save();
+
+//      // Retourner une réponse JSON avec l'utilisateur créé
+//      return response()->json([
+//          'status' => 'SUCCESS',
+//          'data' => [
+//              'client' => $client,
+//              'user' => $user
+//          ],
+//      ], 201);
+//  }
 
 
 /**
@@ -207,5 +265,35 @@ public function login(Request $request)
             return $this->sendResponse(null, StateEnum::ECHEC, "Erreur lors de la déconnexion", 500);
         }
     }
+
+    public function refreshToken(Request $request) {
+        // Vérifier si le refresh token est fourni
+        $refreshToken = $request->input('refresh_token');
+        if (!$refreshToken) {
+            return response()->json(['error' => 'Le refresh token est manquant.'], 400);
+        }
+    
+        // Rechercher l'utilisateur avec ce refresh token
+        $user = User::where('refresh_token', hash('sha256', $refreshToken))->first();
+    
+        if (!$user) {
+            return response()->json(['error' => 'Refresh token invalide.'], 401);
+        }
+    
+        // Générer un nouveau access token
+        $accessToken = $user->createToken('auth_token')->accessToken;
+    
+        // Générer un nouveau refresh token
+        $newRefreshToken = Str::random(60);
+        $user->refresh_token = hash('sha256', $newRefreshToken);
+        $user->save();
+    
+        return response()->json([
+            'access_token' => $accessToken,
+            'refresh_token' => $newRefreshToken,
+            'token_type' => 'Bearer'
+        ]);
+    }
+    
 
 }

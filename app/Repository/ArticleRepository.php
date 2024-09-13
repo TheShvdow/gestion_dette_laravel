@@ -7,25 +7,25 @@ use App\Repository\Interface\ArticleRepositoryInterface;
 
 class ArticleRepository implements ArticleRepositoryInterface
 {
-    protected $article;
+    protected $articleRepository;
     public function __construct(Article $article)
     {
-        $this->article = $article;
+        $this->articleRepository = $article;
     }
 
     public function all()
     {
-        return $this->article->all();
+        return $this->articleRepository->all();
     }
 
     public function create(array $data)
     {
-        return $this->article->create($data);
+        return $this->articleRepository->create($data);
     }
 
     public function find($id)
     {
-        return $this->article->findOrFail($id);
+        return $this->articleRepository->findOrFail($id);
     }
 
     public function update($id, array $data)
@@ -43,11 +43,11 @@ class ArticleRepository implements ArticleRepositoryInterface
 
     public function findByLibelle($libelle)
     {
-        return $this->article->where('libelle', $libelle)->get();
+        return $this->articleRepository->where('libelle', $libelle)->get();
     }
 
     public function findByEtat($etat)
     {
-        return $this->article->where('etat', $etat)->get();
+        return $this->articleRepository->where('etat', $etat)->get();
     }
 }

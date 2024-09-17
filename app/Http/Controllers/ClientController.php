@@ -40,7 +40,8 @@ class ClientController extends Controller
         $include = $request->has('include') ? [$request->input('include')] : [];
         $data = Client::with($include)->whereNotNull('user_id')->get();
         $clients = QueryBuilder::for(Client::class)
-            ->allowedFilters(['surname'])
+            ->allowedFields(['surname', 'address', 'telephone'])    
+            ->allowedFilters(['telephone', 'surname'])
             ->allowedIncludes(['user','client'])
             ->get();
         return new ClientCollection($clients);

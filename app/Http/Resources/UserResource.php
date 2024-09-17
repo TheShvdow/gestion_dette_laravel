@@ -19,8 +19,7 @@ class UserResource extends JsonResource
             'prenom' => $this->prenom,
             'login' => $this->login,
             'photo' => $this->photo,
-            'roleId' => $this->roleId
-
+            'role' => $this->roleId->libelle ? RoleResource::make($this->whenLoaded('role')) : null
         ];
     }
 }

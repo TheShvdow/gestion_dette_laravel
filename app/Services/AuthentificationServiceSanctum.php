@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Services\Interfaces\AuthentificationServiceInterface;
 
@@ -24,11 +25,18 @@ class AuthentificationServiceSanctum implements AuthentificationServiceInterface
 
         // Créer un token Sanctum pour l'utilisateur
         $token = $user->createToken('auth_token')->plainTextToken;
-
+        // generer un refresh token pour l'utilisateur et l'enregistrer dans la base de données
+        $refesh_token = Str::random(60);
+        $user->refresh_token = hash('sha256', $refesh_token);
+        $user->save();
+       
         // Retourner le token et l'utilisateur
         return [
             'token' => $token,
+            'token_type' => 'Bearer',
+            'refresh_token' => $refesh_token,
             'user' => $user
+
         ];
     }
 

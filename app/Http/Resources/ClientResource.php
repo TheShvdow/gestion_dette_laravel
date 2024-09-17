@@ -31,8 +31,7 @@ class ClientResource extends JsonResource
     {
         return [
             
-            'nom' => $this->surname,
-            'prenom' => $this->name,
+            'surnom' => $this->surname,
             'adresse' => $this->adresse,
             'telephone' => $this->telephone,
             'user' => new UserResource($this->whenLoaded('user')),

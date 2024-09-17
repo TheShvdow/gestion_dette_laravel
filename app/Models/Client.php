@@ -49,4 +49,13 @@ class Client extends Model
     function user() {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeFilter($query,$telephone=null,$surnume=null){
+        return $query->when($telephone,function($q) use($telephone){
+            return $q->where('telephone',$telephone);
+        })
+        ->when($surnume,function($q) use($surnume){
+            return $q->where('surname','like','%'.$surnume.'%');    
+        });
+    }
 }

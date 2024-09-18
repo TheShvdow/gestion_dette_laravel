@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             // ClientsTableSeeder::class,
             // UsersTableSeeder::class,
             // ClientsUsersTableSeeder::class
-            ArticlesTableSeeder::class
+            ArticlesTableSeeder::class,
+            DettesTableSeeder::class,
             
         ]);
 

@@ -72,7 +72,7 @@ class Article extends Model
         'deleted_at',
         
     ];
-
+  
     public function scoopFilter($query,$critere)
     {
         if (isset($critere['libelle'])) {

@@ -2,21 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Client;
-use Lcobucci\JWT\Builder;
 use Illuminate\Http\Request;
-use Lcobucci\JWT\Signer\Key;
 use App\Traits\RestResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\StoreUserRequest;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Interfaces\AuthentificationServiceInterface;
 use App\Enums\StateEnum;

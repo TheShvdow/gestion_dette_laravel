@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\ClientController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DetteController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ArticleController;
 
 /*
@@ -25,6 +26,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('/clients', ClientController::class)->only(['index', 'store','show']);
 });
 
+
+//Route pour les articles
 Route::prefix('v1') -> middleware('auth:api','check.role:Boutiquier')->group(function () {
     Route::apiResource('/articles', ArticleController::class)->only(['store','index','show']);
     Route::post('/articles/libelle', [ArticleController::class, 'findByLibelle']);
@@ -36,10 +39,8 @@ Route::prefix('v1') -> middleware('auth:api','check.role:Boutiquier')->group(fun
 });
 
 
-Route::middleware('auth:api')->group(function () {
-    Route::post('/v1/logout', [AuthController::class, 'logout']);
-});
 
+//Route pour l'authentification 
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
@@ -47,3 +48,6 @@ Route::prefix('v1')->group(function () {
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
 
 });
+//Route pour les dettes
+
+Route::middleware('auth:api')->get('v1/dettes', [DetteController::class, 'index']);

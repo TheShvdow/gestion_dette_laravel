@@ -5,6 +5,62 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
+/**
+ * @OA\Schema(
+ *     schema="Dette",
+ *     type="object",
+ *     @OA\Property(
+ *         property="id",
+ *         type="integer",
+ *         format="int64",
+ *         example=1
+ *     ),
+ *     @OA\Property(
+ *         property="date",
+ *         type="string",
+ *         format="date-time",
+ *         example="2024-01-01T00:00:00Z"
+ *     ),
+ *     @OA\Property(
+ *         property="montant",
+ *         type="number",
+ *         format="float",
+ *         example=29.99
+ *     ),
+ *     @OA\Property(
+ *         property="montantDu",
+ *         type="number",
+ *         format="float",
+ *         example=22.99
+ *     ),
+ *     @OA\Property(
+ *         property="montantRestant",
+ *         type="number",
+ *         format="float",
+ *         example=7.99
+ *     ),
+ *     @OA\Property(
+ *         property="client_id",
+ *         type="integer",
+ *         format="int64",
+ *         example=1
+ *     ),
+ *     @OA\Property(
+ *         property="article_details",
+ *         type="array",
+ *         @OA\Items(
+ *             type="object",
+ *             @OA\Property(property="id", type="integer", format="int64", example=1),
+ *             @OA\Property(property="article_id", type="integer", format="int64", example=1),
+ *             @OA\Property(property="libelle", type="string", example="Article Example"),
+ *             @OA\Property(property="quantite", type="integer", format="int64", example=1),
+ *             @OA\Property(property="prixVente", type="number", format="float", example=29.99)
+ *         )
+ *     )
+ * )
+ */
+
 class Dette extends Model
 {
     use HasFactory;

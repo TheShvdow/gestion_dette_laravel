@@ -221,8 +221,8 @@ class ArticleController extends Controller
     }
 
     /**
- * @OA\Get(
- *     path="/articles/findByLibelle",
+ * @OA\Post(
+ *     path="/articles/libelle",
  *     tags={"Articles"},
  *     summary="Find an article by its libelle",
  *     @OA\Parameter(
@@ -336,7 +336,7 @@ class ArticleController extends Controller
     }
 
    /**
- * @OA\Patch(
+ * @OA\Post(
  *     path="/articles/stocks",
  *     tags={"Articles"},
  *     summary="Update stock quantities for multiple articles",

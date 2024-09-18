@@ -17,8 +17,8 @@ return new class extends Migration
             $table->decimal('montant', 10, 2);
             $table->decimal('montantDu', 10, 2);
             $table->decimal('montantRestant', 10, 2);
-            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
-            $table->json('article_libelles')->nullable(); // Stocker les libellés des articles sous forme JSON
+            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->json('article_details'); // Champ pour stocker les articles (quantité, prix, libellé)
             $table->timestamps();
         });
         

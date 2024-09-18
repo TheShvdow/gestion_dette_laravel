@@ -251,13 +251,13 @@
                 ]
             }
         },
-        "/articles/findByLibelle": {
-            "get": {
+        "/articles/libelle": {
+            "post": {
                 "tags": [
                     "Articles"
                 ],
                 "summary": "Find an article by its libelle",
-                "operationId": "38daf630c0384c47492163817ef3aaa0",
+                "operationId": "791dc57b67e356a4086dcb24c55d1530",
                 "parameters": [
                     {
                         "name": "libelle",
@@ -374,12 +374,12 @@
             }
         },
         "/articles/stocks": {
-            "patch": {
+            "post": {
                 "tags": [
                     "Articles"
                 ],
                 "summary": "Update stock quantities for multiple articles",
-                "operationId": "7c9d9dacee8a027f1511a870917d7d20",
+                "operationId": "6fc5e28744838bb666bbc4bef08122ad",
                 "requestBody": {
                     "description": "List of articles with stock updates",
                     "required": true,
@@ -873,7 +873,7 @@
                     },
                     "telephone": {
                         "type": "string",
-                        "example": "0123456789"
+                        "example": "778275234"
                     }
                 },
                 "type": "object"

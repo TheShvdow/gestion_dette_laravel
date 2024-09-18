@@ -9,13 +9,17 @@ class Dette extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['date', 'montant', 'montantDu', 'montantRestant', 'client_id', 'articles'];
+    protected $fillable = ['date', 'montant', 'montantDu', 'montantRestant', 'client_id', 'article_details'];
 
     // Relation Many-to-One avec Client (Une dette appartient à un client)
     public function client()
     {
         return $this->belongsTo(Client::class);
     }
+
+    protected $casts = [
+        'article_details' => 'array', // Convertit le JSON en tableau PHP
+    ];
 
     // Définir une relation personnalisée pour les articles via une structure JSON
     public function getArticlesAttribute($value)

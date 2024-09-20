@@ -793,13 +793,13 @@
             }
         },
         "/dettes": {
-            "get": {
+            "post": {
                 "tags": [
                     "Dettes"
                 ],
                 "summary": "Get list of debts",
                 "description": "Returns a list of debts. Optionally filter by status (Solde, NonSolde)",
-                "operationId": "271cccc424ec9cadaf0baf93c11088ac",
+                "operationId": "0765797cddff4763e641344ea5228c2a",
                 "parameters": [
                     {
                         "name": "statut",

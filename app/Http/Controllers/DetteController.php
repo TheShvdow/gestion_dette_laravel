@@ -26,7 +26,7 @@ class DetteController extends Controller
      */
 
    /**
- * @OA\Get(
+ * @OA\Post(
  *     path="/dettes",
  *     tags={"Dettes"},
  *     summary="Get list of debts",

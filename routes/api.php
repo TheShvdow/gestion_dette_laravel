@@ -50,4 +50,4 @@ Route::prefix('v1')->group(function () {
 });
 //Route pour les dettes
 
-Route::middleware('auth:api')->get('v1/dettes', [DetteController::class, 'index']);
+Route::get('v1/dettes', [DetteController::class, 'index']);

@@ -7,11 +7,6 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Laravel\Passport\Passport;
 use App\Models\User;
 use App\Policies\UserPolicy;
-use App\Models\Passport\AuthCode;
-use App\Models\Passport\Client;
-use App\Models\Passport\PersonalAccessClient;
-use App\Models\Passport\RefreshToken;
-use App\Models\Passport\Token;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -32,7 +27,7 @@ class AuthServiceProvider extends ServiceProvider
 
         Passport::ignoreRoutes();
 
-        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::tokensExpireIn(now()->addHour());  // ou addHours(1)
         Passport::refreshTokensExpireIn(now()->addDays(30));
         Passport::personalAccessTokensExpireIn(now()->addMonths(6));
         

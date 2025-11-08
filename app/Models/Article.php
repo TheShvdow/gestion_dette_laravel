@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @OA\Schema(
+ * @OA\Schema (
  *     schema="Article",
  *     type="object",
  *     @OA\Property(
@@ -52,6 +52,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *         example="2024-01-01T00:00:00Z"
  *     )
  * )
+ * @mixin IdeHelperArticle
  */
 
 

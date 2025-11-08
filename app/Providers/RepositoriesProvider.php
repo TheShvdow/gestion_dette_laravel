@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Repository\RoleRepository;
 use App\Repository\ArticleRepository;
+use App\Repository\DetteRepository;
 use Illuminate\Support\ServiceProvider;
 use App\Repository\Interface\RoleRepositoryInterface;
 use App\Repository\Interface\ArticleRepositoryInterface;
+use App\Repository\Interface\DetteRepositoryInterface;
      
 
 class RepositoriesProvider extends ServiceProvider
@@ -21,6 +23,9 @@ class RepositoriesProvider extends ServiceProvider
         );
         $this->app->bind(
             ArticleRepositoryInterface::class,ArticleRepository::class,
+        );
+        $this->app->bind(
+            DetteRepositoryInterface::class,DetteRepository::class,
         );
     }
 

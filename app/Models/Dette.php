@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 
 /**
- * @OA\Schema(
+ * @OA\Schema (
  *     schema="Dette",
  *     type="object",
  *     @OA\Property(
@@ -59,13 +59,22 @@ use Illuminate\Database\Eloquent\Model;
  *         )
  *     )
  * )
+ * @mixin IdeHelperDette
  */
 
 class Dette extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['date', 'montant', 'montantDu', 'montantRestant', 'client_id', 'article_details'];
+    protected $fillable = [
+        'date',
+        'montant',
+        'montantDu',
+        'montantRestant',
+        'client_id',
+        'article_details',
+        'status',
+    ];
 
     // Relation Many-to-One avec Client (Une dette appartient à un client)
     public function client()
@@ -73,9 +82,45 @@ class Dette extends Model
         return $this->belongsTo(Client::class);
     }
 
+    // Relation One-to-Many avec Paiement (Une dette peut avoir plusieurs paiements)
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class);
+    }
+
     protected $casts = [
         'article_details' => 'array', // Convertit le JSON en tableau PHP
     ];
+
+    /**
+     * Boot method to add model event listeners
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Événement avant la création d'une dette
+        static::creating(function ($dette) {
+            $dette->updateStatusBasedOnMontantRestant();
+        });
+
+        // Événement avant la mise à jour d'une dette
+        static::updating(function ($dette) {
+            $dette->updateStatusBasedOnMontantRestant();
+        });
+    }
+
+    /**
+     * Met à jour automatiquement le statut en fonction du montant restant
+     */
+    protected function updateStatusBasedOnMontantRestant()
+    {
+        if ($this->montantRestant == 0) {
+            $this->status = \App\Enums\StatusDetteEnum::SOLDE;
+        } else {
+            $this->status = \App\Enums\StatusDetteEnum::NON_SOLDE;
+        }
+    }
 
     // Définir une relation personnalisée pour les articles via une structure JSON
     public function getArticlesAttribute($value)
@@ -110,5 +155,4 @@ class Dette extends Model
 
         $this->save(); // Sauvegarder les modifications dans la base de données
     }
-
 }

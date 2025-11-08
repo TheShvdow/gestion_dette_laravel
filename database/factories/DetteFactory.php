@@ -37,6 +37,7 @@ class DetteFactory extends Factory
             'montantRestant' => $this->faker->randomFloat(2, 0, 500),
             'client_id' => Client::factory(),
             'article_details' => $articles->toArray(), // Stocker les détails sous forme JSON
+            'status' => $this->faker->randomElement(['SOLDE', 'NON_SOLDE']),
         ];
     }
 }

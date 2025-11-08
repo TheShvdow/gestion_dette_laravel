@@ -35,7 +35,7 @@ class UserFactory extends Factory
             'prenom' => fake()->firstName(),
             'login' => fake()->unique()->userName(),
             'password' => static::$password ??= Hash::make('password'),
-          'roleId' => $role->id,
+            'roleId' => $role->id,
         ];
     }
 

@@ -2,14 +2,37 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\RoleEnum;
 use App\Enums\StateEnum;
-use App\Enums\UserRole;
 use App\Rules\CustumPasswordRule;
-use App\Rules\PasswordRules;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+
+/**
+ * @OA\Schema(
+ *     schema="StoreUserRequest",
+ *     type="object",
+ *     required={"login", "password", "roleId"},
+ *     @OA\Property(
+ *         property="login",
+ *         type="string",
+ *         example="admin.user",
+ *         description="Login unique (obligatoire)"
+ *     ),
+ *     @OA\Property(
+ *         property="password",
+ *         type="string",
+ *         example="SecureP@ss2024!",
+ *         description="Mot de passe (obligatoire, min 5 caractères avec majuscules, minuscules, chiffres et caractères spéciaux)"
+ *     ),
+ *     @OA\Property(
+ *         property="roleId",
+ *         type="integer",
+ *         example=1,
+ *         description="ID du rôle (1=Admin, 2=Boutiquier)"
+ *     )
+ * )
+ */
 
 class StoreUserRequest extends FormRequest
 {
@@ -26,51 +49,35 @@ class StoreUserRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function Rules(): array
+    public function rules(): array
     {
         return [
-            'nom' => 'required|string|max:255',
-            'prenom' => 'required|string|max:255',
-            'login' => 'required|string|max:255|unique:users,login',
-          //  'email' => 'required|email|unique:users,email',
-            'password' =>['confirmed', new CustumPasswordRule()],
-            //roles is taken in the User model by using the role_id foreign key
-            'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'storage_mode' => 'required|in:base64,cloudinary',       
-            'role.libelle' => ['required_with:role','string'],
-           
+            'login' => ['required', 'string', 'max:255', 'unique:users,login'],
+            'password' => ['required', new CustumPasswordRule()],
+            'roleId' => ['required', 'integer', 'in:1,2'], // Seulement Admin (1) ou Boutiquier (2)
         ];
     }
 
-    public function validationMessages(): array
+    public function messages(): array
     {
         return [
-            'nom.required' => 'Le nom est obligatoire.',
-            'prenom.required' => 'Le prénom est obligatoire.',
-            'email.required' => "L'email est obligatoire.",
-            'email.email' => "L'email doit être une adresse email valide.",
-            'email.unique' => "Cet email est déjà utilisé.",
             'login.required' => 'Le login est obligatoire.',
-            'login.unique' => "Cet login est déjà utilisé.",
-            'role.required' => 'Le role est obligatoire.',
-            'role.string' => 'Le role doit être une chaine de caractères.',
+            'login.unique' => 'Ce login est déjà utilisé.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'roleId.required' => 'Le rôle est obligatoire.',
+            'roleId.in' => 'Le rôle doit être Admin (1) ou Boutiquier (2).',
         ];
     }
 
     /**
      * Handle a failed validation attempt.
-     *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return void
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
-
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'status' => StateEnum::ECHEC,
-            'errors' => $validator->errors(),
-        ], 422));
+            'status' => 411,
+            'data' => $validator->errors(),
+            'message' => 'Erreur de validation'
+        ], 411));
     }
 }

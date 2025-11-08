@@ -17,29 +17,12 @@ class CustomResponseMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        // Exemple de condition pour renvoyer une réponse personnalisée
-        // if (!$request->has('required_param')) {
-        //     return $this->sendError(
-        //         null,
-        //         'Paramètre requis manquant.',
-        //         400
-        //     );
-        // }
+        // Continuer le traitement de la requête
+        $response = $next($request);
 
-        // // Continuer le traitement de la requête
-        // $response = $next($request);
+        // Vous pouvez ajouter une logique de réponse personnalisée ici si nécessaire
 
-        // // Ajouter une réponse personnalisée en cas de succès
-        // if ($response instanceof JsonResponse && $response->status() === 200) {
-        //     $data = $response->getData(true); // Récupérer les données de la réponse
-        //     return $this->sendResponse(
-        //         $data['data'] ?? null,
-        //         'Succès',
-        //         200
-        //     );
-        // }
-
-        // return $response;
+        return $response;
     }
 
     /**

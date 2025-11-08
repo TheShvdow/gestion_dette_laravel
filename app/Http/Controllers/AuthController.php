@@ -37,138 +37,187 @@ class AuthController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"login", "password"},
-     *             @OA\Property(property="login", type="string", example="donnelly.isabel"),
-     *             @OA\Property(property="password", type="string", example="password")
+     *             @OA\Property(property="login", type="string", example="idrissa.wade"),
+     *             @OA\Property(property="password", type="string", example="SecureP@ss2024!")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Connexion réussie",
      *         @OA\JsonContent(
-     *             @OA\Property(property="token", type="string", example="eyJhbGci..."),
-     *             @OA\Property(property="token_type", type="string", example="Bearer")
+     *             type="object",
+     *             @OA\Property(property="status", type="integer", example=200),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="token", type="string", example="eyJhbGci...")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Connexion reussie")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=411,
+     *         description="Erreur de validation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="integer", example=411),
+     *             @OA\Property(property="data", type="object"),
+     *             @OA\Property(property="message", type="string", example="Erreur de validation")
      *         )
      *     ),
      *     @OA\Response(
      *         response=401,
      *         description="Échec de l'authentification",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="integer", example=401),
+     *             @OA\Property(property="data", type="null"),
+     *             @OA\Property(property="message", type="string", example="Echec de l'authentification")
+     *         )
      *     )
      * )
      */
 
-public function login(Request $request)
+public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'login' => 'required|string',
             'password' => 'required|string',
         ]);
-        if ($validator->fails()) 
-            return $this->sendResponse(['errors' => $validator->errors()], StateEnum::ECHEC, "Donnée erroné'", 422);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 411,
+                'data' => $validator->errors(),
+                'message' => 'Erreur de validation'
+            ], 411);
+        }
+
         try {
-            $token = $this->authService->authentificate($request->only('login', 'password'))["token"];
-            $refreshToken = $this->authService->authentificate($request->only('login', 'password'))["refresh_token"];
-            
-            
-            
-               
-            return $this->sendResponse(['token' => $token, 'token_type' => 'Bearer','refresh_token' => $refreshToken ], message: "Connexion réussie");
+            $authResult = $this->authService->authentificate($request->only('login', 'password'));
+            $token = $authResult["token"];
+
+            return response()->json([
+                'status' => 200,
+                'data' => ['token' => $token],
+                'message' => 'Connexion reussie'
+            ], 200);
         } catch (\Exception $e) {
-            return $this->sendResponse(null, StateEnum::ECHEC, "Échec de l'authentification'", 401);
+            return response()->json([
+                'status' => 401,
+                'data' => null,
+                'message' => 'Echec de l\'authentification'
+            ], 401);
         }
     }
 /**
  * @OA\Post(
  *     path="/register",
  *     tags={"Authentification"},
- *     summary="Register a new user",
+ *     summary="Créer un compte utilisateur pour un client",
+ *     description="Crée un compte utilisateur pour un client existant (rôle Boutiquier requis)",
+ *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
  *         required=true,
- *         @OA\MediaType(
- *             mediaType="multipart/form-data",
- *             @OA\Schema(
- *                 type="object",
- *                 required={"nom", "prenom", "login", "password", "password_confirmation", "client_id", "roleId"},
- *                 @OA\Property(property="nom", type="string", example="Doe"),
- *                 @OA\Property(property="prenom", type="string", example="John"),
- *                 @OA\Property(property="login", type="string", example="johndoe"),
- *                 @OA\Property(property="password", type="string", format="password", example="securepassword123"),
- *                 @OA\Property(property="password_confirmation", type="string", format="password", example="securepassword123"),
- *                 @OA\Property(property="client_id", type="string", example="12345"),
- *                 @OA\Property(property="roleId", type="integer", example=1),
- *                 @OA\Property(property="photo", type="string", format="binary"),
- *             )
+ *         @OA\JsonContent(
+ *             required={"login", "password", "clientId"},
+ *             @OA\Property(property="login", type="string", example="client.user"),
+ *             @OA\Property(property="password", type="string", example="SecureP@ss2024!"),
+ *             @OA\Property(property="clientId", type="integer", example=1)
  *         )
  *     ),
  *     @OA\Response(
  *         response=201,
- *         description="User registered successfully",
+ *         description="Utilisateur créé avec succès",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer"),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="user", ref="#/components/schemas/User"),
- *                 @OA\Property(property="token", type="string")
+ *             @OA\Property(property="status", type="integer", example=201),
+ *             @OA\Property(
+ *                 property="data",
+ *                 type="object",
+ *                 @OA\Property(property="client", ref="#/components/schemas/Client"),
+ *                 @OA\Property(property="user", ref="#/components/schemas/User")
  *             ),
- *             @OA\Property(property="message", type="string")
+ *             @OA\Property(property="message", type="string", example="Utilisateur cree avec succees")
  *         )
  *     ),
- *     @OA\Response(response=400, description="Invalid input"),
- *     @OA\Response(response=409, description="User already exists")
+ *     @OA\Response(
+ *         response=411,
+ *         description="Erreur de validation",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer", example=411),
+ *             @OA\Property(property="data", type="object"),
+ *             @OA\Property(property="message", type="string", example="Erreur de validation")
+ *         )
+ *     )
  * )
  */
-
-
- public function register(StoreUserRequest $request, FileStorageServiceInterface $fileStorageService): JsonResponse
+public function register(Request $request): JsonResponse
 {
-    // Vérifier si le rôle CLIENT (id 3) existe
-    $role = Role::find(self::CLIENT_ROLE_ID);
-
-    if (!$role) {
-        return response()->json([
-            'status' => 'ECHEC',
-            'message' => 'Le rôle spécifié n\'existe pas.'
-        ], 400);
-    }
-
-    // Vérifier si le client spécifié existe
-    $client = Client::find($request->input('client_id'));
-
-    if (!$client) {
-        return response()->json([
-            'status' => 'ECHEC',
-            'message' => 'Le client spécifié n\'existe pas.'
-        ], 400);
-    }
-
-    // Stocker le lien de la photo
-    $photoUrl = null;
-    if ($request->hasFile('photo')) {
-        $photo = $request->file('photo');
-        $photoUrl = $fileStorageService->upload($photo, 'photos');
-    }
-
-    // Créer un nouvel utilisateur avec le rôle CLIENT
-    $user = User::create([
-        'nom' => $request->input('nom'),
-        'prenom' => $request->input('prenom'),
-        'login' => $request->input('login'),
-        'password' => Hash::make($request->input('password')),
-        'photo' => $photoUrl,
-        'roleId' => self::CLIENT_ROLE_ID, // Assigner le rôle CLIENT
+    // Validation
+    $validator = Validator::make($request->all(), [
+        'login' => 'required|string|unique:users,login',
+        'password' => ['required', new \App\Rules\CustumPasswordRule()],
+        'clientId' => 'required|integer|exists:clients,id',
     ]);
 
-    // Mettre à jour le client avec l'ID de l'utilisateur créé
-    $client->user_id = $user->id;
-    $client->save();
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => 411,
+            'data' => $validator->errors(),
+            'message' => 'Erreur de validation'
+        ], 411);
+    }
 
-    // Retourner une réponse JSON avec l'utilisateur créé
-    return response()->json([
-        'status' => 'SUCCESS',
-        'data' => [
-            'user' => $user,
-            'client' => $client
-        ],
-    ], 201);
+    try {
+        DB::beginTransaction();
+
+        // Récupérer le client
+        $client = Client::find($request->input('clientId'));
+
+        // Vérifier que le client n'a pas déjà un compte
+        if ($client->user_id) {
+            return response()->json([
+                'status' => 411,
+                'data' => ['clientId' => ['Ce client a déjà un compte utilisateur']],
+                'message' => 'Erreur de validation'
+            ], 411);
+        }
+
+        // Créer l'utilisateur avec le rôle CLIENT (id 3)
+        $user = User::create([
+            'nom' => '',
+            'prenom' => '',
+            'login' => $request->input('login'),
+            'password' => Hash::make($request->input('password')),
+            'roleId' => self::CLIENT_ROLE_ID,
+            'active' => 'oui',
+        ]);
+
+        // Associer le client au user
+        $client->user_id = $user->id;
+        $client->save();
+
+        DB::commit();
+
+        return response()->json([
+            'status' => 201,
+            'data' => [
+                'client' => $client,
+                'user' => $user
+            ],
+            'message' => 'Utilisateur cree avec succees'
+        ], 201);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 500,
+            'data' => null,
+            'message' => $e->getMessage()
+        ], 500);
+    }
 }
 
 

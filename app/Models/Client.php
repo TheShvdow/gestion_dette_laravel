@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
- * @OA\Schema(
+ * @OA\Schema (
  *     schema="Client",
  *     type="object",
  *     required={"Surname", "Telephone"},
@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *         example="123 Rue Principale"
  *     ),
  * )
+ * @mixin IdeHelperClient
  */
 class Client extends Model
 {
@@ -48,6 +49,10 @@ class Client extends Model
 
     function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function dettes() {
+        return $this->hasMany(Dette::class);
     }
 
     public function scopeFilter($query,$telephone=null,$surnume=null){

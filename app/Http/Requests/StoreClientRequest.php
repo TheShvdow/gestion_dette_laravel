@@ -15,31 +15,36 @@ use Illuminate\Http\Exceptions\HttpResponseException;
  * @OA\Schema(
  *     schema="StoreClientRequest",
  *     type="object",
- *     required={"surname", "adresse", "telephone", "user"},
+ *     required={"nom", "prenom", "telephone"},
  *     @OA\Property(
- *         property="surname",
+ *         property="nom",
  *         type="string",
- *         example="Doe"
+ *         example="Wade",
+ *         description="Nom du client (obligatoire)"
  *     ),
  *     @OA\Property(
- *         property="adresse",
+ *         property="prenom",
  *         type="string",
- *         example="123 Rue Principale"
+ *         example="Idrissa",
+ *         description="Prénom du client (obligatoire)"
  *     ),
  *     @OA\Property(
  *         property="telephone",
  *         type="string",
- *         example="771234567"
+ *         example="771234567",
+ *         description="Téléphone portable sénégalais (obligatoire et unique)"
  *     ),
  *     @OA\Property(
- *         property="user",
- *         type="object",
- *         required={"nom", "prenom", "login", "password", "roleId"},
- *         @OA\Property(property="nom", type="string", example="John"),
- *         @OA\Property(property="prenom", type="string", example="Doe"),
- *         @OA\Property(property="login", type="string", example="johndoe"),
- *         @OA\Property(property="password", type="string", example="Password123!"),
- *         @OA\Property(property="roleId", type="integer", example="3")
+ *         property="login",
+ *         type="string",
+ *         example="idrissa.wade",
+ *         description="Login pour créer un compte utilisateur (optionnel mais unique)"
+ *     ),
+ *     @OA\Property(
+ *         property="password",
+ *         type="string",
+ *         example="SecureP@ss2024!",
+ *         description="Mot de passe (obligatoire si login fourni, min 5 caractères avec majuscules, minuscules, chiffres et caractères spéciaux)"
  *     )
  * )
  */
@@ -64,43 +69,35 @@ class StoreClientRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
-            'surname' => ['required', 'string', 'max:255','unique:clients,surname'],
-            'address' => ['string', 'max:255'],
-            'telephone' => ['required',new TelephoneRule()],'unique:clients,telephone',
+        return [
+            'nom' => ['required', 'string', 'max:255'],
+            'prenom' => ['required', 'string', 'max:255'],
+            'telephone' => ['required', new TelephoneRule(), 'unique:clients,telephone'],
 
-            'user' => ['sometimes','array'],
-            'user.nom' => ['required_with:user','string'],
-            'user.prenom' => ['required_with:user','string'],
-            'user.login' => ['required_with:user','string'],
-            'user.password' => ['required_with:user', new CustumPasswordRule(),'confirmed'],
-            'user.roleId' => ['required_with:user','integer']
+            // Si login est fourni, alors password est obligatoire
+            'login' => ['nullable', 'string', 'unique:users,login'],
+            'password' => ['required_with:login', new CustumPasswordRule()],
         ];
-/*
-        if ($this->filled('user')) {
-            $userRules = (new StoreUserRequest())->Rules();
-            $rules = array_merge($rules, ['user' => 'array']);
-            $rules = array_merge($rules, array_combine(
-                array_map(fn($key) => "user.$key", array_keys($userRules)),
-                $userRules
-            ));
-        }
-*/
-      //  dd($rules);
-
-        return $rules;
     }
 
     function messages()
     {
         return [
-            'surname.required' => "Le surnom est obligatoire.",
-            'telephone.required' => "Le numéro de téléphone est obligatoire.",
+            'nom.required' => "Le nom est obligatoire.",
+            'prenom.required' => "Le prénom est obligatoire.",
+            'telephone.required' => "Le numéro de téléphone est obligatoire.",
+            'telephone.unique' => "Ce numéro de téléphone existe déjà.",
+            'login.unique' => "Ce login existe déjà.",
+            'password.required_with' => "Le mot de passe est obligatoire lorsque le login est fourni.",
         ];
     }
 
     function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->sendResponse($validator->errors(),StateEnum::ECHEC,404));
+        throw new HttpResponseException(response()->json([
+            'status' => 411,
+            'data' => $validator->errors(),
+            'message' => 'Erreur de validation'
+        ], 411));
     }
 }

@@ -12,7 +12,7 @@ use Laravel\Passport\HasApiTokens;
 
 
 /**
- * @OA\Schema(
+ * @OA\Schema (
  *     schema="User",
  *     type="object",
  *     required={"nom", "prenom", "login", "role"},
@@ -42,7 +42,9 @@ use Laravel\Passport\HasApiTokens;
  *         example="/uploads/users/photo.jpg",
  *         nullable=true
  *     )
+ * 
  * )
+ * @mixin IdeHelperUser
  */
 
 
@@ -62,7 +64,7 @@ class User extends Authenticatable
         'login',
         'roleId',
         'password',
-
+        'active',
     ];
 
     /**

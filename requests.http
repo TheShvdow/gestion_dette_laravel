@@ -1,0 +1,43 @@
+### login
+POST http://127.0.0.1:8000/api/v1/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "login": "idrissa.wade",
+    "password": "Cybershvdow10@"
+}
+
+### get all dettes
+GET http://127.0.0.1:8000/api/v1/dettes
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYTlkOTE5OGI5YjdkODkzMGIxNDJhMjMxMzQ1MDVmYTU3ZTQ2ZDVjYzEzMDJjMWJmMWE5MTA2ZDQ0ZjNkYWY1MTViYzUyYmU3M2M0OTFiYWMiLCJpYXQiOjE3NjI1MTA1MjIuOTM4NTg5LCJuYmYiOjE3NjI1MTA1MjIuOTM4NTk3LCJleHAiOjE3NzgxNDg5MjIuOTI0NTg3LCJzdWIiOiIxMSIsInNjb3BlcyI6W119.ByhBOGOnBqrqAzxPdT7mDO4A20fet_9_xCn1U5cNcbcJigpn566gdVT_k0vxSpGcWoFqggmb2lyqOtF7pEhDcPpclsWji3KN1YPOccb063d3AcyFSkn1LQ9mqszaU7LQbk3TYStdP9EVvq1y6tAKDVChn_NWPFCdR18Wh6dDGKKvKpFl2Nam5Pomjdlc0KMBDJGMX3YxGrRxqgecSsTEwpB3oXapCcVgDQ2uZYmiC6iYz7L735OtFvbGSVHSHgMqqqCaDngfhO0N61MJSTtBdnLqejj_vb17VeqABcrvDdsfz2UxyYK-qRbAYuEam1fmM5tr3KVDNcjHLnCkuqpiveB3kwls_rfyVQcNsLUS6K45T_VhYUpTBcviyEqLutOPr_u44qXIjCj6EjL6xu5FHji9A0cePZB5CAmYDZCaHTuAF5ju4Nu8CvqBSMMlv8E1fpjTa9DdeL4vDKALhRy5W-tayQvIXCzoCZMyn3MvHrgVzm35wLz3JAPU3rt1HKfwO_O-9uiH9INcR9x9YPG__N7Qery7fFNBRvmZa4KL3JAfs33OigBi3hab6sTV4Ivs1cSXxA4f7g1lNfy-Ebuc97ZYGet5E6myASv2fhUbaRElLCXJbLABY7LaakfHQJziUO9nftyBqiBYzi-uBYflRcPoEdGXxOeumBC1PYQVoGc
+
+### create dette
+POST http://127.0.0.1:8000/api/v1/dettes
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMDkxNDIzYjM4ZTg2ODBmZTE0ZTIzOGY1ZWYzZGZkMzkwODhmNzVjNjQ2YzEzY2U0MWUzM2JiZGE2NDA5NGIzNDY1OTI3NWI4ZGY0MzliZGIiLCJpYXQiOjE3NjI1MDQyODMuOTY1MjE1LCJuYmYiOjE3NjI1MDQyODMuOTY1MjIxLCJleHAiOjE3NzgxNDI2ODMuOTU1MjY3LCJzdWIiOiIxMSIsInNjb3BlcyI6W119.EygKKNXshYk7zylA6xg9hVyk52Ym0uNUDaROOAIYrgvMvwqEqUHRPZu9Q79j8F5MVSZY0KX6X9tv65EboYuyGXK_hRRo0tpgbM5DYeednlDL-W1VeTVSHzJ5PXf7QwZR7niPizCbqT886S3uYgjOgUxf1djbne6_Hi7cWnRKqVOwgbO6j4_fRzSb0OKVw0AmixeOa6VW734Get-AMBHSzn0NtksKD83kzwOyDQXUOhcoSSTrWk1b1xKh9GEZhXroZmUgJUBMeMUndTo8sAdDpyHbpMfo_T1RJNJcW6LAg8GxCcTtM-4ZBOa-Oemo7dZhn_cIzzMKnJPA9bxc-EwMNNPXp4zb6fLa0rDqP7Llf-XzaeUqHGklTNbg25EvwPjlh-QhF6csNzD7Qecd6aihBoA9NMKjVGbAFq66e-_LKZEg4P65jCzcA2-6ulWi4l54PkFUQEAmRzUEtyyaqmhvKN07gwZlgJWSPlg7dhKjTzDb0mnOTxI892DJ4gG77dUyVESt1R_FQEemUorT-FEwF9xyBugSYkphIht7mLxbeZZlKDoo4M6Yg0jhJWDd5QAbj6fTfLMTFa8EcinhbJK68dSmzdYoMvOPGdIAmkZKy8fK4nLPlKzSJB9iiDuk8olJerviXSRV716XrXddYrqhehUiHUj8k7c-htmJv2DAsUw
+
+{
+    "date": "2025-01-08",
+    "montant": 1000,
+    "montantDu": 800,
+    "montantRestant": 200,
+    "client_id": 1,
+    "article_details": [
+        {
+            "article_id": 1,
+            "libelle": "Achat de marchandises",
+            "quantite": 10,
+            "prixVente": 100
+        }
+    ]
+}
+
+### get dette by id
+GET http://127.0.0.1:8000/api/v1/dettes/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYTlkOTE5OGI5YjdkODkzMGIxNDJhMjMxMzQ1MDVmYTU3ZTQ2ZDVjYzEzMDJjMWJmMWE5MTA2ZDQ0ZjNkYWY1MTViYzUyYmU3M2M0OTFiYWMiLCJpYXQiOjE3NjI1MTA1MjIuOTM4NTg5LCJuYmYiOjE3NjI1MTA1MjIuOTM4NTk3LCJleHAiOjE3NzgxNDg5MjIuOTI0NTg3LCJzdWIiOiIxMSIsInNjb3BlcyI6W119.ByhBOGOnBqrqAzxPdT7mDO4A20fet_9_xCn1U5cNcbcJigpn566gdVT_k0vxSpGcWoFqggmb2lyqOtF7pEhDcPpclsWji3KN1YPOccb063d3AcyFSkn1LQ9mqszaU7LQbk3TYStdP9EVvq1y6tAKDVChn_NWPFCdR18Wh6dDGKKvKpFl2Nam5Pomjdlc0KMBDJGMX3YxGrRxqgecSsTEwpB3oXapCcVgDQ2uZYmiC6iYz7L735OtFvbGSVHSHgMqqqCaDngfhO0N61MJSTtBdnLqejj_vb17VeqABcrvDdsfz2UxyYK-qRbAYuEam1fmM5tr3KVDNcjHLnCkuqpiveB3kwls_rfyVQcNsLUS6K45T_VhYUpTBcviyEqLutOPr_u44qXIjCj6EjL6xu5FHji9A0cePZB5CAmYDZCaHTuAF5ju4Nu8CvqBSMMlv8E1fpjTa9DdeL4vDKALhRy5W-tayQvIXCzoCZMyn3MvHrgVzm35wLz3JAPU3rt1HKfwO_O-9uiH9INcR9x9YPG__N7Qery7fFNBRvmZa4KL3JAfs33OigBi3hab6sTV4Ivs1cSXxA4f7g1lNfy-Ebuc97ZYGet5E6myASv2fhUbaRElLCXJbLABY7LaakfHQJziUO9nftyBqiBYzi-uBYflRcPoEdGXxOeumBC1PYQVoGc

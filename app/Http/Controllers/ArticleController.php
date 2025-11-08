@@ -34,43 +34,37 @@ class ArticleController extends Controller
  * @OA\Get(
  *     path="/articles",
  *     tags={"Articles"},
- *     summary="List all articles",
+ *     summary="Lister ensemble des articles du stock",
+ *     description="Liste tous les articles avec filtre optionnel de disponibilité (rôle Boutiquier requis). Retourne 'Liste des articles' si des articles sont trouvés, sinon 'Pas Articles' avec data=null",
  *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="per_page",
- *         in="query",
- *         description="Number of items per page",
- *         @OA\Schema(type="integer", default=10)
- *     ),
  *     @OA\Parameter(
  *         name="disponible",
  *         in="query",
- *         description="Filter by availability",
+ *         description="Filtrer par disponibilité: oui (qteStock > 0) ou non (qteStock = 0)",
+ *         required=false,
  *         @OA\Schema(type="string", enum={"oui", "non"})
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="List of articles",
+ *         description="Succès - Liste des articles ou 'Pas Articles' si vide",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="status", type="integer", example=200),
  *             @OA\Property(
  *                 property="data",
- *                 type="array",
- *                 @OA\Items(ref="#/components/schemas/Article")
+ *                 oneOf={
+ *                     @OA\Schema(type="array", @OA\Items(ref="#/components/schemas/Article")),
+ *                     @OA\Schema(type="null")
+ *                 }
  *             ),
- *             @OA\Property(property="message", type="string")
+ *             @OA\Property(property="message", type="string", example="Liste des articles", description="'Liste des articles' si trouvés, 'Pas Articles' si vide")
  *         )
- *     ),
- *     @OA\Response(response=404, description="No articles found")
+ *     )
  * )
  */
 
     public function index(Request $request) : JsonResponse
     {
-        $perPage = $request->input('per_page', 10);
-        $articles = Article::paginate($perPage);
-
         $disponible = $request->query('disponible');
 
         if ($disponible === 'oui') {
@@ -78,14 +72,21 @@ class ArticleController extends Controller
         } elseif ($disponible === 'non') {
             $articles = Article::where('quantite', '=', 0)->get();
         } else {
-            // If no filter is provided, return all articles
             $articles = Article::all();
+        }
+
+        if ($articles->isEmpty()) {
+            return response()->json([
+                'status' => 200,
+                'data' => null,
+                'message' => 'Pas Articles'
+            ], 200);
         }
 
         return response()->json([
             'status' => 200,
             'data' => $articles,
-            'message' => 'Articles trouves avec succès'
+            'message' => 'Liste des articles'
         ], 200);
     }
 
@@ -105,43 +106,53 @@ class ArticleController extends Controller
  * @OA\Post(
  *     path="/articles",
  *     tags={"Articles"},
- *     summary="Store a newly created article",
+ *     summary="Enregistrer un nouvel article",
+ *     description="Crée un nouvel article (rôle Boutiquier requis)",
  *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
- *         description="Article object that needs to be added",
+ *         description="Données de l'article à créer",
  *         required=true,
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="libelle", type="string"),
- *             @OA\Property(property="prix", type="number", format="float"),
- *             @OA\Property(property="quantite", type="integer", example=100)
- *         )
+ *         @OA\JsonContent(ref="#/components/schemas/StoreArticleRequest")
  *     ),
  *     @OA\Response(
  *         response=201,
- *         description="Article created successfully",
+ *         description="Article enregistré avec succès",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="status", type="integer", example=201),
  *             @OA\Property(property="data", ref="#/components/schemas/Article"),
- *             @OA\Property(property="message", type="string")
+ *             @OA\Property(property="message", type="string", example="Article enregistrer avec succees")
  *         )
  *     ),
- *     @OA\Response(response=400, description="Invalid input")
+ *     @OA\Response(
+ *         response=411,
+ *         description="Erreur de validation",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer", example=411),
+ *             @OA\Property(property="data", type="object"),
+ *             @OA\Property(property="message", type="string", example="Erreur de validation")
+ *         )
+ *     )
  * )
  */
     public function store(StoreArticleRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        // Use $validated to store the validated data in your database
-        
-        $article = Article::create($validated);
-        
+
+        // Mapper qteStock vers quantite pour le modèle
+        $articleData = [
+            'libelle' => $validated['libelle'],
+            'prix' => $validated['prix'],
+            'quantite' => $validated['qteStock'],
+        ];
+
+        $article = Article::create($articleData);
 
         return response()->json([
             'status' => 201,
             'data' => $article,
-            'message' => 'Article enregistré avec succès'
+            'message' => 'Article enregistrer avec succees'
         ], 201);
     }
 
@@ -153,47 +164,55 @@ class ArticleController extends Controller
  * @OA\Get(
  *     path="/articles/{id}",
  *     tags={"Articles"},
- *     summary="Get an article by ID",
+ *     summary="Lister un article à partir de l'ID",
+ *     description="Récupère les détails d'un article spécifique par son ID (rôle Boutiquier requis)",
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
  *         name="id",
  *         in="path",
  *         required=true,
- *         description="ID of the article to retrieve",
+ *         description="ID de l'article à récupérer",
  *         @OA\Schema(type="integer", format="int64", example=1)
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Article details",
+ *         description="Article trouvé",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="status", type="integer", example=200),
  *             @OA\Property(property="data", ref="#/components/schemas/Article"),
- *             @OA\Property(property="message", type="string")
+ *             @OA\Property(property="message", type="string", example="article trouve")
  *         )
  *     ),
- *     @OA\Response(response=404, description="Article not found")
+ *     @OA\Response(
+ *         response=411,
+ *         description="Article non trouvé",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer", example=411),
+ *             @OA\Property(property="data", type="null"),
+ *             @OA\Property(property="message", type="string", example="Objet non trouve")
+ *         )
+ *     )
  * )
  */
-    public function show(int $id)
+    public function show(int $id): JsonResponse
     {
         $article = Article::find($id);
-        $article = Article::paginate(10);
 
         if (!$article) {
             return response()->json([
-                'status' => 404,
+                'status' => 411,
                 'data' => null,
-                'message' => 'Article non trouve'
-            ], 404);
+                'message' => 'Objet non trouve'
+            ], 411);
         }
 
         return response()->json([
             'status' => 200,
             'data' => $article,
-            'message' => 'Article détails récupéré avec succés'
+            'message' => 'article trouve'
         ], 200);
-        
     }
 
     /**
@@ -224,49 +243,66 @@ class ArticleController extends Controller
  * @OA\Post(
  *     path="/articles/libelle",
  *     tags={"Articles"},
- *     summary="Find an article by its libelle",
- *     @OA\Parameter(
- *         name="libelle",
- *         in="query",
- *         description="The libelle of the article to find",
+ *     summary="Lister un article a partir de son libelle",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
  *         required=true,
- *         @OA\Schema(type="string")
+ *         @OA\JsonContent(
+ *             required={"libelle"},
+ *             @OA\Property(property="libelle", type="string", example="Lait Laicran 700g")
+ *         )
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Article found",
+ *         description="Article trouve",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="status", type="integer", example=200),
  *             @OA\Property(property="data", ref="#/components/schemas/Article"),
- *             @OA\Property(property="message", type="string")
+ *             @OA\Property(property="message", type="string", example="article trouve")
  *         )
  *     ),
- *     @OA\Response(response=404, description="Article not found"),
- *     @OA\Response(response=400, description="Bad Request")
+ *     @OA\Response(
+ *         response=411,
+ *         description="Objet non trouve",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="status", type="integer", example=411),
+ *             @OA\Property(property="data", type="null"),
+ *             @OA\Property(property="message", type="string", example="Objet non trouve")
+ *         )
+ *     )
  * )
  */
     public function findByLibelle(Request $request): JsonResponse
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'libelle' => 'required|string',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 411,
+                'data' => $validator->errors(),
+                'message' => 'Erreur de validation'
+            ], 411);
+        }
 
         $libelle = $request->input('libelle');
         $article = Article::where('libelle', $libelle)->first();
 
         if (!$article) {
             return response()->json([
-                'status' => 404,
+                'status' => 411,
                 'data' => null,
-                'message' => 'Article non trouvé'
-            ], 404);
+                'message' => 'Objet non trouve'
+            ], 411);
         }
 
         return response()->json([
             'status' => 200,
             'data' => $article,
-            'message' => 'Article trouvé avec succès'
+            'message' => 'article trouve'
         ], 200);
     }
 
@@ -305,12 +341,63 @@ class ArticleController extends Controller
  *     @OA\Response(response=404, description="Article not found")
  * )
  */
+    /**
+     * @OA\Patch(
+     *     path="/articles/{id}",
+     *     tags={"Articles"},
+     *     summary="Mettre à jour la quantité en stock d'un article",
+     *     description="Met à jour la quantité en stock d'un article spécifique (rôle Boutiquier requis)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de l'article",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"qteStock"},
+     *             @OA\Property(property="qteStock", type="integer", example=50, description="Nouvelle quantité en stock")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Quantité mise à jour avec succès",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="integer", example=200),
+     *             @OA\Property(property="data", ref="#/components/schemas/Article"),
+     *             @OA\Property(property="message", type="string", example="qte stock mis a jour")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=411,
+     *         description="Article non trouvé",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="integer", example=411),
+     *             @OA\Property(property="data", type="null"),
+     *             @OA\Property(property="message", type="string", example="Objet non trouve")
+     *         )
+     *     )
+     * )
+     */
     public function updateStock(Request $request, $id): JsonResponse
     {
         // Validate the incoming request
-        $request->validate([
-            'quantite' => 'required|integer|min:0',
+        $validator = Validator::make($request->all(), [
+            'qteStock' => 'required|numeric|min:0',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 411,
+                'data' => $validator->errors(),
+                'message' => 'Erreur de validation'
+            ], 411);
+        }
 
         // Find the article by id
         $article = Article::find($id);
@@ -318,122 +405,114 @@ class ArticleController extends Controller
         // Check if the article exists
         if (!$article) {
             return response()->json([
-                'status' => 404,
+                'status' => 411,
                 'data' => null,
-                'message' => 'Article not found'
-            ], 404);
+                'message' => 'Objet non trouve'
+            ], 411);
         }
 
-        // Update the stock quantity
-        $article->quantite += $request->input('quantite');
+        // Update the stock quantity (set to new value, not increment)
+        $article->quantite = $request->input('qteStock');
         $article->save();
 
         return response()->json([
             'status' => 200,
             'data' => $article,
-            'message' => 'Article stock updated successfully'
+            'message' => 'qte stock mis a jour'
         ], 200);
     }
 
    /**
  * @OA\Post(
- *     path="/articles/stocks",
+ *     path="/articles/all",
  *     tags={"Articles"},
- *     summary="Update stock quantities for multiple articles",
+ *     summary="Mettre à jour la quantité en stock de plusieurs articles",
+ *     description="Met à jour la quantité en stock de plusieurs articles en une seule requête (rôle Boutiquier requis)",
  *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
- *         description="List of articles with stock updates",
+ *         description="Tableau d'articles avec leurs nouvelles quantités",
  *         required=true,
  *         @OA\JsonContent(
  *             type="array",
  *             @OA\Items(
  *                 type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="quantite", type="integer", example=10)
+ *                 required={"id", "qteStock"},
+ *                 @OA\Property(property="id", type="integer", example=1, description="ID de l'article"),
+ *                 @OA\Property(property="qteStock", type="integer", example=50, description="Nouvelle quantité en stock")
  *             )
  *         )
  *     ),
  *     @OA\Response(
  *         response=200,
- *         description="Stocks updated successfully",
+ *         description="Mise à jour effectuée",
  *         @OA\JsonContent(
  *             type="object",
- *             @OA\Property(property="status", type="integer"),
+ *             @OA\Property(property="status", type="integer", example=200),
  *             @OA\Property(
  *                 property="data",
  *                 type="object",
- *                 @OA\Property(property="updated", type="array", @OA\Items(ref="#/components/schemas/Article")),
- *                 @OA\Property(property="failed", type="array", @OA\Items(type="object"))
+ *                 @OA\Property(property="success", type="array", @OA\Items(ref="#/components/schemas/Article"), description="Liste des articles mis à jour"),
+ *                 @OA\Property(
+ *                     property="error",
+ *                     type="array",
+ *                     @OA\Items(
+ *                         type="object",
+ *                         @OA\Property(property="id", type="integer"),
+ *                         @OA\Property(property="message", type="string")
+ *                     ),
+ *                     description="Liste des articles non trouvés"
+ *                 )
  *             ),
- *             @OA\Property(property="message", type="string")
+ *             @OA\Property(property="message", type="string", example="Mise a jour effectuee")
  *         )
- *     ),
- *     @OA\Response(response=400, description="Validation errors"),
- *     @OA\Response(response=404, description="No articles updated")
+ *     )
  * )
  */
     public function updateMultipleStocks(Request $request): JsonResponse
 {
     // Initialize arrays to hold results
-    $updatedArticles = [];
-    $failedArticles = [];
-    $errors = [];
+    $successArticles = [];
+    $errorArticles = [];
 
     foreach ($request->all() as $item) {
         // Validate each item individually
         $validator = Validator::make($item, [
-            'id' => 'required|integer|exists:articles,id',
-            'quantite' => 'required|integer|min:0',
+            'id' => 'required|integer',
+            'qteStock' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
-            // If validation fails, add the errors to the errors array
-            $errors[$item['id']] = $validator->errors()->all();
+            $errorArticles[] = [
+                'id' => $item['id'] ?? null,
+                'message' => 'Validation echouee'
+            ];
             continue;
         }
 
-        // If validation passes, attempt to update the article
+        // Attempt to find and update the article
         $article = Article::find($item['id']);
 
         if ($article) {
-            $article->quantite += $item['quantite'];
+            $article->quantite = $item['qteStock'];
             $article->save();
-            $updatedArticles[] = $article;
+            $successArticles[] = $article;
         } else {
-            $failedArticles[] = $item;
+            $errorArticles[] = [
+                'id' => $item['id'],
+                'message' => 'Article non trouve'
+            ];
         }
     }
 
-    // Paginate the successfully updated articles
-    $paginatedUpdatedArticles = (new \Illuminate\Pagination\LengthAwarePaginator(
-        $updatedArticles,
-        count($updatedArticles),
-        10,
-        $request->input('page', 1),
-        ['path' => $request->url(), 'query' => $request->query()]
-    ));
-
     // Prepare the response data
-    $response = [
+    return response()->json([
         'status' => 200,
         'data' => [
-            'updated' => $paginatedUpdatedArticles,
-            'failed' => $failedArticles
+            'success' => $successArticles,
+            'error' => $errorArticles
         ],
-        'message' => 'Les stocks des articles ont été mis à jour avec succès pour les articles valides.'
-    ];
-
-    // If there are validation errors, update the response status and message
-    if (!empty($errors)) {
-        $response['status'] = 400;
-        $response['message'] = 'Certaines erreurs ont été trouvées.';
-        $response['errors'] = $errors;
-    } elseif (empty($updatedArticles)) {
-        $response['status'] = 404;
-        $response['message'] = 'Aucun article mis à jour. Veuillez vérifier les identifiants.';
-    }
-
-    return response()->json($response, $response['status']);
+        'message' => 'Mise a jour effectuee'
+    ], 200);
 }
 
 /**

@@ -68,29 +68,52 @@
         </div>
 
         <!-- Articles -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="bg-white/80 backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-xl border border-gray-200">
           <div class="p-6">
-            <h3 class="text-lg font-semibold mb-4">Articles</h3>
+            <h3 class="text-lg font-semibold mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Articles de la dette
+            </h3>
 
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Article</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix Unitaire</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="article in dette.articles" :key="article.id">
-                    <td class="px-6 py-4 whitespace-nowrap">{{ article.libelle }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ article.pivot.qte }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ formatMoney(article.pivot.prix) }} FCFA</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-semibold">{{ formatMoney(article.pivot.qte * article.pivot.prix) }} FCFA</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-if="dette.article_details && dette.article_details.length > 0" class="overflow-x-auto -mx-4 sm:mx-0">
+              <div class="inline-block min-w-full align-middle">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gradient-to-r from-gray-50 to-slate-50">
+                    <tr>
+                      <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Article</th>
+                      <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Quantité</th>
+                      <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Prix Unitaire</th>
+                      <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="(article, index) in dette.article_details" :key="index" class="hover:bg-gray-50 transition-colors">
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap font-medium text-gray-900 text-sm">{{ article.libelle }}</td>
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-medium bg-indigo-100 text-indigo-800">
+                          {{ article.quantite }}
+                        </span>
+                      </td>
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-gray-600 text-sm">{{ formatMoney(article.prix) }} FCFA</td>
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap font-semibold text-indigo-600 text-sm">{{ formatMoney(article.total || article.quantite * article.prix) }} FCFA</td>
+                    </tr>
+                  </tbody>
+                  <tfoot class="bg-gradient-to-r from-indigo-50 to-purple-50">
+                    <tr>
+                      <td colspan="3" class="px-3 sm:px-6 py-3 sm:py-4 text-right font-semibold text-gray-700 text-sm sm:text-base">Total:</td>
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-base sm:text-lg text-indigo-600">{{ formatMoney(dette.montant) }} FCFA</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <p class="mt-2">Aucun article associé à cette dette</p>
             </div>
           </div>
         </div>
@@ -100,21 +123,23 @@
           <div class="p-6">
             <h3 class="text-lg font-semibold mb-4">Historique des Paiements</h3>
 
-            <div v-if="dette.paiements && dette.paiements.length > 0" class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="paiement in dette.paiements" :key="paiement.id">
-                    <td class="px-6 py-4 whitespace-nowrap">{{ formatDate(paiement.date) }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-green-600">{{ formatMoney(paiement.montant) }} FCFA</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-if="dette.paiements && dette.paiements.length > 0" class="overflow-x-auto -mx-4 sm:mx-0">
+              <div class="inline-block min-w-full align-middle">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Date</th>
+                      <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="paiement in dette.paiements" :key="paiement.id">
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm">{{ formatDate(paiement.date) }}</td>
+                      <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap font-semibold text-green-600 text-sm">{{ formatMoney(paiement.montant) }} FCFA</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
             <div v-else class="text-center py-8 text-gray-500">
               Aucun paiement enregistré pour cette dette

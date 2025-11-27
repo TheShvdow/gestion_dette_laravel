@@ -49,6 +49,10 @@ php artisan view:cache
 echo "Checking /health route..."
 php artisan route:list | grep health || echo "No health route found!"
 
+# Test the health endpoint directly
+echo "Testing /health endpoint..."
+php artisan tinker --execute="echo \Illuminate\Support\Facades\Route::dispatch(\Illuminate\Http\Request::create('/health', 'GET'))->getContent();" 2>&1 || echo "Health endpoint test failed"
+
 # Ensure proper permissions
 echo "Setting permissions..."
 chown -R www-data:www-data /var/www/html/storage

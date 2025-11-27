@@ -8,16 +8,12 @@ use App\Http\Controllers\Web\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\DetteController;
 use App\Http\Controllers\Web\ClientController;
-use App\Http\Controllers\HealthController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
-
-// Health check pour Render.com (pas de middleware, pas de redirection)
-Route::get('/health', [HealthController::class, 'check'])->name('health');
 
 // Page d'accueil publique
 Route::get('/', function () {

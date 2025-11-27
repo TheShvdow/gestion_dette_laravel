@@ -19,6 +19,15 @@ use App\Http\Controllers\UserController;
 |
 */
 
+// Health check - NO MIDDLEWARE
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'gestion-dette-app',
+        'timestamp' => now()->toIso8601String()
+    ], 200);
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

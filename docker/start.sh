@@ -5,6 +5,11 @@ echo "=========================================="
 echo "Starting Laravel Application on Render.com"
 echo "=========================================="
 
+# Configure Nginx port from environment variable (default 8080)
+PORT=${PORT:-8080}
+echo "Configuring Nginx to listen on port $PORT..."
+sed -i "s/listen 8080;/listen $PORT;/" /etc/nginx/nginx.conf
+
 # Wait for database to be ready
 echo "Waiting for database connection..."
 until php artisan migrate:status 2>/dev/null || [ $? -eq 1 ]; do

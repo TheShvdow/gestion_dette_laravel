@@ -32,9 +32,22 @@ echo "Optimizing application..."
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
+
+# Verify HealthController exists
+if [ -f "/var/www/html/app/Http/Controllers/HealthController.php" ]; then
+    echo "✓ HealthController.php found"
+else
+    echo "✗ HealthController.php NOT FOUND!"
+    exit 1
+fi
+
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+# Debug: show the /health route
+echo "Checking /health route..."
+php artisan route:list | grep health || echo "No health route found!"
 
 # Ensure proper permissions
 echo "Setting permissions..."

@@ -20,7 +20,7 @@ php artisan migrate --force --no-interaction
 
 # Install Passport (OAuth2 server)
 echo "Installing Laravel Passport..."
-php artisan passport:install --force || true
+php artisan passport:install --force --no-interaction || true
 
 # Clear and cache configurations
 echo "Optimizing application..."

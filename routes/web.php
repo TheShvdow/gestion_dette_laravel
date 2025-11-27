@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Web\ArticleController;
 use App\Http\Controllers\Web\DetteController;
 use App\Http\Controllers\Web\ClientController;
+use App\Http\Controllers\Web\Client\DetteController as ClientDetteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,13 +16,8 @@ use App\Http\Controllers\Web\ClientController;
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil publique
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-    return redirect()->route('login');
-})->name('home');
+// Page d'accueil publique - redirect vers login
+Route::redirect('/', '/login', 302)->name('home');
 
 // Routes d'authentification
 Route::middleware('guest')->group(function () {
@@ -68,13 +64,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Routes Client
     Route::middleware(['check.role:Client'])->prefix('client')->name('client.')->group(function () {
-        Route::get('/dettes', function () {
-            $client = \App\Models\Client::where('user_id', auth()->id())->first();
-            $dettes = $client ? \App\Models\Dette::where('client_id', $client->id)->paginate(15) : [];
-
-            return Inertia::render('Client/Dettes/Index', [
-                'dettes' => $dettes,
-            ]);
-        })->name('dettes.index');
+        Route::get('/dettes', [ClientDetteController::class, 'index'])->name('dettes.index');
     });
 });

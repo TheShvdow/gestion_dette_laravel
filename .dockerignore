@@ -1,0 +1,58 @@
+# Dependencies
+/node_modules
+/vendor
+
+# Build artifacts
+/public/hot
+/public/storage
+/public/build
+
+# Environment files
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Tests
+/tests
+/phpunit.xml
+/phpunit.result.cache
+/.phpunit.cache
+
+# Documentation
+README.md
+CHANGELOG.md
+*.md
+
+# Storage (will be created at runtime)
+/storage/*.key
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Other
+.editorconfig
+.styleci.yml
+.php_cs
+.php_cs.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.DS_Store
+Thumbs.db

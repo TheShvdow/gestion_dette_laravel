@@ -17,7 +17,7 @@ use App\Http\Controllers\HealthController;
 */
 
 // Health check pour Render.com (pas de middleware, pas de redirection)
-Route::get('/health', [HealthController::class, 'check']);
+Route::get('/health', [HealthController::class, 'check'])->name('health');
 
 // Page d'accueil publique
 Route::get('/', function () {

@@ -1,0 +1,8 @@
+# Railway Nixpacks configuration
+# Cette configuration indique à Railway d'utiliser Docker au lieu de Nixpacks
+
+[phases.build]
+cmds = ["echo 'Using Dockerfile for build'"]
+
+[phases.setup]
+nixPkgs = []

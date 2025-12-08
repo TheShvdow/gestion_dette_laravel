@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================="
-echo "Starting Laravel Application on Render.com"
+echo "Starting Laravel Application"
 echo "=========================================="
 
 # Configure Nginx port from environment variable (default 8080)
@@ -41,7 +41,9 @@ else
     exit 1
 fi
 
-php artisan config:cache
+# DO NOT cache config in production - it prevents env vars from being read
+# Only cache routes and views for performance
+echo "Caching routes and views..."
 php artisan route:cache
 php artisan view:cache
 

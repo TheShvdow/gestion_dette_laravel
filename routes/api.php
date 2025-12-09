@@ -7,6 +7,7 @@ use App\Http\Controllers\DetteController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,10 +33,24 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// API v1 - Public auth routes
+Route::prefix('v1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+
+    // Protected auth routes
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
+        Route::get('/user', [AuthController::class, 'user']);
+        Route::get('/dashboard', [DashboardController::class, 'index']);
+    });
+});
+
 Route::prefix('v1')->middleware(['auth:api', 'check.role:Boutiquier'])->group(function () {
     Route::apiResource('/clients', ClientController::class)->only(['index', 'store','show']);
-    Route::post('/clients/{id}/dettes', [ClientController::class, 'getClientDettes']);
-    Route::post('/clients/{id}/user', [ClientController::class, 'getClientWithUser']);
+    Route::get('/clients/{id}/dettes', [ClientController::class, 'getClientDettes']);
+    Route::get('/clients/{id}/user', [ClientController::class, 'getClientWithUser']);
 });
 
 
@@ -52,14 +67,7 @@ Route::prefix('v1') -> middleware('auth:api','check.role:Boutiquier')->group(fun
 
 
 
-//Route pour l'authentification
-Route::prefix('v1')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
-    Route::middleware(['auth:api', 'check.role:Boutiquier'])->post('/register', [AuthController::class, 'register']);
-    Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
-
-});
+// Authentication routes moved above to avoid duplication
 //Route pour les dettes (protégées par authentification)
 Route::prefix('v1')->middleware('auth:api')->group(function () {
     Route::get('dettes', [DetteController::class, 'index']);

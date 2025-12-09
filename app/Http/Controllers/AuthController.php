@@ -16,6 +16,7 @@ use App\Services\Interfaces\AuthentificationServiceInterface;
 use App\Enums\StateEnum;
 use App\Services\Interfaces\FileStorageServiceInterface;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -315,28 +316,59 @@ public function register(Request $request): JsonResponse
         if (!$refreshToken) {
             return response()->json(['error' => 'Le refresh token est manquant.'], 400);
         }
-    
+
         // Rechercher l'utilisateur avec ce refresh token
         $user = User::where('refresh_token', hash('sha256', $refreshToken))->first();
-    
+
         if (!$user) {
             return response()->json(['error' => 'Refresh token invalide.'], 401);
         }
-    
+
         // Générer un nouveau access token
         $accessToken = $user->createToken('auth_token')->accessToken;
-    
+
         // Générer un nouveau refresh token
         $newRefreshToken = Str::random(60);
         $user->refresh_token = hash('sha256', $newRefreshToken);
         $user->save();
-    
+
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $newRefreshToken,
             'token_type' => 'Bearer'
         ]);
     }
-    
 
+    /**
+     * Get authenticated user
+     */
+    public function user(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => 401,
+                    'data' => null,
+                    'message' => 'Unauthenticated'
+                ], 401);
+            }
+
+            // Load role relationship
+            $user->load('role');
+
+            return response()->json([
+                'status' => 200,
+                'data' => $user,
+                'message' => 'User retrieved successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'data' => null,
+                'message' => 'Error retrieving user: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

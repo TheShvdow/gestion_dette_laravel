@@ -58,7 +58,7 @@ class ClientController extends Controller
  */
     public function index(Request $request): JsonResponse
     {
-        $query = Client::query();
+        $query = Client::with('user');
 
         // Filtre comptes=oui|non
         if ($request->has('comptes')) {

@@ -1,25 +1,4 @@
-# Multi-stage Dockerfile for Laravel + Vue.js on Render.com
-# Stage 1: Build Node.js assets
-FROM node:20-alpine AS node_builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --production=false
-
-# Copy source files needed for build
-COPY vite.config.js ./
-COPY tailwind.config.js ./
-COPY postcss.config.js ./
-COPY resources ./resources
-
-# Build assets
-RUN npm run build
-
-# Stage 2: PHP Runtime
+# Dockerfile for Laravel API-only (No frontend)
 FROM php:8.2-fpm-alpine
 
 # Install system dependencies
@@ -64,9 +43,6 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 # Copy application files
 COPY . .
 
-# Copy built assets from node_builder stage
-COPY --from=node_builder /app/public/build ./public/build
-
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize
 
@@ -87,7 +63,7 @@ RUN chmod +x /usr/local/bin/start.sh
 RUN mkdir -p /var/log/supervisor \
     && mkdir -p /run/nginx
 
-# Expose port (Render uses PORT env variable)
+# Expose port
 EXPOSE 8080
 
 # Start application via supervisor

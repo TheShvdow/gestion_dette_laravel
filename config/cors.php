@@ -19,15 +19,18 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_filter([
         'http://localhost:5173',  // Vite dev server
         'http://localhost:3000',  // Alternative dev port
-        env('FRONTEND_URL', '*'), // Production frontend URL
-    ],
+        env('FRONTEND_URL'),      // Production frontend URL from .env
+        env('APP_ENV') === 'local' ? '*' : null, // Allow all origins in local dev
+    ]),
 
     'allowed_origins_patterns' => [
-        '/^https:\/\/.*\.vercel\.app$/',  // Vercel preview deployments
-        '/^https:\/\/.*\.netlify\.app$/', // Netlify deployments
+        '/^https:\/\/.*\.vercel\.app$/',     // Vercel preview deployments
+        '/^https:\/\/.*\.netlify\.app$/',    // Netlify deployments
+        '/^https:\/\/.*\.laravel\.cloud$/',  // Laravel Cloud deployments
+        '/^https:\/\/.*\.koyeb\.app$/',      // Koyeb deployments
     ],
 
     'allowed_headers' => ['*'],

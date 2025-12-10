@@ -5,6 +5,14 @@ echo "=========================================="
 echo "Starting Laravel Application"
 echo "=========================================="
 
+# Debug: Print environment variables (without sensitive data)
+echo "Environment check:"
+echo "DB_HOST: ${DB_HOST:-NOT_SET}"
+echo "DB_PORT: ${DB_PORT:-NOT_SET}"
+echo "DB_DATABASE: ${DB_DATABASE:-NOT_SET}"
+echo "DB_USERNAME: ${DB_USERNAME:-NOT_SET}"
+echo "DATABASE_URL present: ${DATABASE_URL:+YES}"
+
 PORT=${PORT:-8080}
 sed -i "s/listen 8080;/listen $PORT;/" /etc/nginx/nginx.conf
 
@@ -13,6 +21,30 @@ php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
+
+# Parse DATABASE_URL if DB_HOST is not set
+if [ -z "$DB_HOST" ] && [ -n "$DATABASE_URL" ]; then
+  echo "DB_HOST not set, parsing from DATABASE_URL..."
+  # Extract host, port, database, username, password from DATABASE_URL
+  # Format: postgres://username:password@host:port/database
+  DB_HOST=$(echo $DATABASE_URL | sed -n 's|.*@\([^:]*\):.*|\1|p')
+  DB_PORT=$(echo $DATABASE_URL | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+  DB_DATABASE=$(echo $DATABASE_URL | sed -n 's|.*/\([^?]*\).*|\1|p')
+  DB_USERNAME=$(echo $DATABASE_URL | sed -n 's|.*://\([^:]*\):.*|\1|p')
+  DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's|.*://[^:]*:\([^@]*\)@.*|\1|p')
+
+  echo "Extracted from DATABASE_URL:"
+  echo "DB_HOST: $DB_HOST"
+  echo "DB_PORT: $DB_PORT"
+  echo "DB_DATABASE: $DB_DATABASE"
+  echo "DB_USERNAME: $DB_USERNAME"
+fi
+
+# Validate required variables
+if [ -z "$DB_HOST" ]; then
+  echo "ERROR: DB_HOST is not set and could not be parsed from DATABASE_URL"
+  exit 1
+fi
 
 # Wait for database
 echo "Waiting for PostgreSQL database at $DB_HOST:$DB_PORT..."

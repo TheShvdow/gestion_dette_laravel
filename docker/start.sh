@@ -10,9 +10,16 @@ PORT=${PORT:-8080}
 echo "Configuring Nginx to listen on port $PORT..."
 sed -i "s/listen 8080;/listen $PORT;/" /etc/nginx/nginx.conf
 
-# Wait for database to be ready
-echo "Waiting for database connection..."
-until php artisan migrate:status 2>/dev/null || [ $? -eq 1 ]; do
+# Clear Laravel caches to force reading .env
+echo "Clearing Laravel caches to apply environment variables..."
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# Wait for PostgreSQL database to be ready
+echo "Waiting for PostgreSQL database at $DB_HOST:$DB_PORT..."
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME"; do
   echo "Database not ready, waiting..."
   sleep 2
 done
@@ -20,22 +27,21 @@ done
 echo "Database connection established!"
 
 # Run migrations
-echo "Running database migrations..."
-php artisan migrate --force --no-interaction
+# echo "Running database migrations..."
+# php artisan migrate --force --no-interaction
 
 # Install Passport (OAuth2 server)
-echo "Installing Laravel Passport..."
-php artisan passport:install --force --no-interaction || true
+# echo "Installing Laravel Passport..."
+# php artisan passport:install --force --no-interaction || true
 
 # Seed initial data (roles and users)
-echo "Seeding initial data..."
-php artisan db:seed --class=InitialDataSeeder --force --no-interaction || true
+# echo "Seeding initial data..."
+# php artisan db:seed --class=InitialDataSeeder --force --no-interaction || true
 
-# Clear and cache configurations
-echo "Optimizing application..."
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+# Cache routes and views for performance (do NOT cache config in production)
+echo "Caching routes and views..."
+php artisan route:cache
+php artisan view:cache
 
 # Verify HealthController exists
 if [ -f "/var/www/html/app/Http/Controllers/HealthController.php" ]; then
@@ -45,17 +51,7 @@ else
     exit 1
 fi
 
-# DO NOT cache config in production - it prevents env vars from being read
-# Only cache routes and views for performance
-echo "Caching routes and views..."
-php artisan route:cache
-php artisan view:cache
-
-# Debug: show the /health route
-echo "Checking /health route..."
-php artisan route:list | grep health || echo "No health route found!"
-
-# Test the health endpoint directly
+# Test the /health endpoint
 echo "Testing /health endpoint..."
 php artisan tinker --execute="echo \Illuminate\Support\Facades\Route::dispatch(\Illuminate\Http\Request::create('/health', 'GET'))->getContent();" 2>&1 || echo "Health endpoint test failed"
 

@@ -20,16 +20,16 @@ done
 echo "Database connection established!"
 
 # Run migrations
-# echo "Running database migrations..."
-# php artisan migrate --force --no-interaction
+echo "Running database migrations..."
+php artisan migrate --force --no-interaction
 
 # Install Passport (OAuth2 server)
-# echo "Installing Laravel Passport..."
-# php artisan passport:install --force --no-interaction || true
+echo "Installing Laravel Passport..."
+php artisan passport:install --force --no-interaction || true
 
 # Seed initial data (roles and users)
-# echo "Seeding initial data..."
-# php artisan db:seed --class=InitialDataSeeder --force --no-interaction || true
+echo "Seeding initial data..."
+php artisan db:seed --class=InitialDataSeeder --force --no-interaction || true
 
 # Clear and cache configurations
 echo "Optimizing application..."

@@ -12,7 +12,7 @@ services:
         value: false
       - key: APP_URL
         value: https://gestion-dette.onrender.com
-      - key: APP_KEY
+      - key: APP_KEY  
         generateValue: true
 
       # Neon Database
@@ -39,10 +39,13 @@ services:
       - key: QUEUE_CONNECTION
         value: sync
 
-      # Cloudinary
+      # Cloudinary (optionnel - à configurer dans le dashboard Render)
       - key: CLOUDINARY_CLOUD_NAME
+        sync: false
       - key: CLOUDINARY_API_KEY
+        sync: false
       - key: CLOUDINARY_API_SECRET
+        sync: false
 
       # Swagger
       - key: L5_SWAGGER_CONST_HOST

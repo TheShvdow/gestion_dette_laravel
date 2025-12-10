@@ -11,6 +11,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     postgresql-dev \
+    postgresql-client \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -19,7 +20,6 @@ RUN apk add --no-cache \
     curl \
     git \
     unzip \
-    bash \
     shadow
 
 # ============================

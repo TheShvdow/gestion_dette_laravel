@@ -71,13 +71,25 @@ bash test-api.sh
 
 ---
 
-## 🚀 Déploiement Render
+## 🚀 Déploiement
+
+### Koyeb (Recommandé - 100% Gratuit)
+
+```bash
+bash deploy-koyeb.sh "Deploy to Koyeb"
+```
+
+- ✅ **100% Gratuit** (pas de CB)
+- ✅ Pas de sleep
+- ✅ SSL automatique
+
+Documentation : [DEPLOIEMENT_KOYEB.md](DEPLOIEMENT_KOYEB.md)
+
+### Render (Payant)
 
 ```bash
 bash deploy.sh "Deploy to Render"
 ```
-
-Puis créez le service sur https://dashboard.render.com
 
 Documentation : [DEPLOIEMENT_RENDER.md](DEPLOIEMENT_RENDER.md)
 

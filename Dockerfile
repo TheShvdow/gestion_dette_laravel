@@ -1,14 +1,5 @@
 # ============================
-# 1) BUILD STAGE - Composer
-# ============================
-FROM composer:2 AS vendor
-
-WORKDIR /app
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-scripts --no-autoloader
-
-# ============================
-# 2) BUILD STAGE - Laravel App
+# BUILD STAGE - Laravel App
 # ============================
 FROM php:8.2-fpm-alpine AS app
 
@@ -32,16 +23,22 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
        pdo_pgsql pgsql mbstring bcmath zip gd exif pcntl
 
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 # Working directory
 WORKDIR /var/www/html
 
-# Copy composer vendor stage
-COPY --from=vendor /app/vendor ./vendor
+# Copy composer files
+COPY composer.json composer.lock ./
 
-# Copy Laravel
+# Install dependencies
+RUN composer install --no-dev --prefer-dist --no-scripts --no-autoloader --optimize-autoloader
+
+# Copy Laravel application
 COPY . .
 
-# Composer autoload optimize
+# Generate optimized autoload
 RUN composer dump-autoload --optimize
 
 # Permissions

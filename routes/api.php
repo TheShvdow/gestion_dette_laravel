@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SetupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Setup endpoints (should be disabled in production after initial setup)
+    Route::post('/setup/create-boutiquier', [SetupController::class, 'createBoutiquier']);
+    Route::get('/setup/list-users', [SetupController::class, 'listUsers']);
 
     // Protected auth routes
     Route::middleware('auth:api')->group(function () {

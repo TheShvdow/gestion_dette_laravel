@@ -39,14 +39,7 @@ services:
       - key: QUEUE_CONNECTION
         value: sync
 
-      # Cloudinary (optionnel - à configurer dans le dashboard Render)
-      - key: CLOUDINARY_CLOUD_NAME
-        sync: false
-      - key: CLOUDINARY_API_KEY
-        sync: false
-      - key: CLOUDINARY_API_SECRET
-        sync: false
-
+      
       # Swagger
       - key: L5_SWAGGER_CONST_HOST
         value: https://gestion-dette.onrender.com/api/v1

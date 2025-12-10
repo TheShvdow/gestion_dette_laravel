@@ -1,70 +1,49 @@
 services:
   - type: web
-    name: gestion-dette-api
+    name: gestion-dette
     env: docker
     plan: starter
     region: frankfurt
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/health
     envVars:
-      - key: APP_NAME
-        value: "Gestion Dette API"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
+      - key: APP_URL
+        value: https://gestion-dette.onrender.com
       - key: APP_KEY
         generateValue: true
-      - key: APP_URL
-        value: https://gestion-dette-api.onrender.com
-      - key: LOG_CHANNEL
-        value: stderr
-      - key: LOG_LEVEL
-        value: error
+
+      # Neon Database
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        fromDatabase:
-          name: gestion-dette-db
-          property: host
+        value: ep-sparkling-dream-adoo4yue-pooler.c-2.us-east-1.aws.neon.tech
       - key: DB_PORT
-        fromDatabase:
-          name: gestion-dette-db
-          property: port
+        value: 5432
       - key: DB_DATABASE
-        fromDatabase:
-          name: gestion-dette-db
-          property: database
+        value: neondb
       - key: DB_USERNAME
-        fromDatabase:
-          name: gestion-dette-db
-          property: user
+        value: neondb_owner
       - key: DB_PASSWORD
-        fromDatabase:
-          name: gestion-dette-db
-          property: password
+        value: npg_L2SzdOM3fRPG
+      - key: DB_SSLMODE
+        value: require
+
+      # Laravel basics
       - key: CACHE_DRIVER
+        value: file
+      - key: SESSION_DRIVER
         value: file
       - key: QUEUE_CONNECTION
         value: sync
-      - key: SESSION_DRIVER
-        value: file
-      - key: SESSION_LIFETIME
-        value: 120
-      - key: BROADCAST_DRIVER
-        value: log
-      - key: FILESYSTEM_DISK
-        value: local
-      - key: CORS_ALLOWED_ORIGINS
-        value: "*"
-      - key: PASSPORT_PRIVATE_KEY
-        sync: false
-      - key: PASSPORT_PUBLIC_KEY
-        sync: false
 
-databases:
-  - name: gestion-dette-db
-    plan: starter
-    region: frankfurt
-    databaseName: gestion_dette
-    user: gestion_dette_user
+      # Cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+
+      # Swagger
+      - key: L5_SWAGGER_CONST_HOST
+        value: https://gestion-dette.onrender.com/api/v1

@@ -7,7 +7,6 @@ use App\Services\Interfaces\FileStorageServiceInterface;
 use Illuminate\Support\ServiceProvider;
 use App\Services\DetteService;
 use App\Services\Interfaces\DetteServiceInterface;
-use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,13 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Passport token expiration is configured in AuthServiceProvider
-
-        // Charger les clés Passport depuis les variables d'environnement pour Laravel Cloud
-        $this->setupPassportKeys();
+        //
     }
-
-    /**
-     * Configure Passport keys from environment variables
-     */
-    
+}

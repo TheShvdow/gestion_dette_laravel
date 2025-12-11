@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $privateKey = config('passport.private_key');
         $publicKey = config('passport.public_key');
 
-        // Si les clés sont dans l'environnement (encodées en base64)
+        // Si les clés sont dans l'environnement (encodées en base64) - pour Laravel Cloud
         if ($privateKey && $publicKey) {
             // Décoder et sauvegarder temporairement les clés
             $privateKeyPath = storage_path('oauth-private.key');
@@ -54,7 +54,10 @@ class AppServiceProvider extends ServiceProvider
                 chmod($privateKeyPath, 0600);
                 chmod($publicKeyPath, 0600);
             }
+        }
 
+        // Toujours charger les clés depuis storage (que ce soit depuis env ou fichiers existants)
+        if (file_exists(storage_path('oauth-private.key')) && file_exists(storage_path('oauth-public.key'))) {
             Passport::loadKeysFrom(storage_path());
         }
     }

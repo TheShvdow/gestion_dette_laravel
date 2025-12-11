@@ -73,10 +73,15 @@ class StoreClientRequest extends FormRequest
             'nom' => ['required', 'string', 'max:255'],
             'prenom' => ['required', 'string', 'max:255'],
             'telephone' => ['required', new TelephoneRule(), 'unique:clients,telephone'],
+            'adresse' => ['nullable', 'string', 'max:255'],
 
-            // Si login est fourni, alors password est obligatoire
+            // Si login est fourni (soit directement, soit dans user.login), alors password est obligatoire
             'login' => ['nullable', 'string', 'unique:users,login'],
             'password' => ['required_with:login', new CustumPasswordRule()],
+
+            // Support pour user.login et user.password (format objet)
+            'user.login' => ['nullable', 'string', 'unique:users,login'],
+            'user.password' => ['required_with:user.login', new CustumPasswordRule()],
         ];
     }
 

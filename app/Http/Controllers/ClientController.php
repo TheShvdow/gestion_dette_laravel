@@ -140,18 +140,21 @@ public function store(StoreClientRequest $request): JsonResponse
         $client = Client::create([
             'surname' => $request->input('nom') . ' ' . $request->input('prenom'),
             'telephone' => $request->input('telephone'),
-            'adresse' => null,
+            'adresse' => $request->input('adresse'), // ✅ Utiliser l'adresse envoyée
         ]);
 
         $userData = null;
 
-        // Si login est fourni, créer un compte utilisateur
-        if ($request->has('login') && $request->filled('login')) {
+        // Si login est fourni (soit directement, soit dans user.login), créer un compte utilisateur
+        $login = $request->input('user.login') ?? $request->input('login');
+        $password = $request->input('user.password') ?? $request->input('password');
+
+        if ($login) {
             $user = User::create([
                 'nom' => $request->input('nom'),
                 'prenom' => $request->input('prenom'),
-                'login' => $request->input('login'),
-                'password' => bcrypt($request->input('password')),
+                'login' => $login,
+                'password' => bcrypt($password),
                 'roleId' => 3, // CLIENT
                 'active' => 'oui',
             ]);

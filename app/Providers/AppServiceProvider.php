@@ -34,31 +34,4 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Configure Passport keys from environment variables
      */
-    protected function setupPassportKeys(): void
-    {
-        $privateKey = config('passport.private_key');
-        $publicKey = config('passport.public_key');
-
-        // Si les clés sont dans l'environnement (encodées en base64) - pour Laravel Cloud
-        if ($privateKey && $publicKey) {
-            // Décoder et sauvegarder temporairement les clés
-            $privateKeyPath = storage_path('oauth-private.key');
-            $publicKeyPath = storage_path('oauth-public.key');
-
-            // Créer les fichiers de clés s'ils n'existent pas
-            if (!file_exists($privateKeyPath) || !file_exists($publicKeyPath)) {
-                file_put_contents($privateKeyPath, base64_decode($privateKey));
-                file_put_contents($publicKeyPath, base64_decode($publicKey));
-
-                // Définir les permissions appropriées
-                chmod($privateKeyPath, 0600);
-                chmod($publicKeyPath, 0600);
-            }
-        }
-
-        // Toujours charger les clés depuis storage (que ce soit depuis env ou fichiers existants)
-        if (file_exists(storage_path('oauth-private.key')) && file_exists(storage_path('oauth-public.key'))) {
-            Passport::loadKeysFrom(storage_path());
-        }
-    }
-}
+    

@@ -18,8 +18,8 @@ class AuthCustomServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            AuthentificationServiceInterface::class, AuthentificationServicePassport::class,
-            //AuthentificationServiceInterface::class,AuthentificationServiceSanctum::class
+            //AuthentificationServiceInterface::class, AuthentificationServicePassport::class,
+            AuthentificationServiceInterface::class,AuthentificationServiceSanctum::class
         );
     }
     /**

@@ -1,116 +1,112 @@
-# Gestion Dette - API Laravel
+# 💰 Gestion Dette - Backend API
 
-Application de gestion de dettes avec Laravel 10, PostgreSQL (Neon) et authentification JWT (Passport).
+API REST Laravel pour la gestion de dettes commerciales avec authentification Sanctum et PostgreSQL.
 
-## 🚀 Stack Technique
-
-- **Backend** : Laravel 10.x
-- **Base de données** : PostgreSQL 16 (Neon Database)
-- **Authentification** : Laravel Passport (OAuth2/JWT)
-- **Déploiement** : Docker (Render)
+![Laravel](https://img.shields.io/badge/Laravel-10.x-red.svg)
+![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.x-blue.svg)
 
 ---
 
-## ⚙️ Installation Locale
+## 🎯 Présentation
 
-### 1. Cloner et installer
+Backend API REST complet pour un système de gestion de dettes destiné aux boutiques. Gestion des clients, articles, dettes et paiements avec authentification sécurisée Laravel Sanctum.
+
+---
+
+## ✨ Fonctionnalités
+
+### 🔐 Authentification
+- ✅ Login/Logout avec Sanctum
+- ✅ Tokens API sécurisés  
+- ✅ Gestion des rôles (Admin, Boutiquier, Client)
+
+### 👥 Clients
+- ✅ CRUD complet
+- ✅ Recherche et filtrage
+- ✅ Association compte utilisateur
+
+### 📦 Articles  
+- ✅ Gestion du stock
+- ✅ Mise à jour automatique
+
+### 💳 Dettes
+- ✅ Création multi-articles
+- ✅ Paiement initial optionnel
+- ✅ Validation du stock
+
+### 💰 Paiements
+- ✅ Historique complet
+- ✅ Mise à jour automatique du solde
+
+---
+
+## 🛠 Stack
+
+- **Framework:** Laravel 10.x
+- **Base de données:** PostgreSQL 16 (Neon)
+- **Auth:** Laravel Sanctum
+- **Hébergement:** Laravel Cloud
+
+---
+
+## 🚀 Installation
 
 ```bash
+# Cloner
 git clone https://github.com/votre-username/gestion_dette_laravel.git
 cd gestion_dette_laravel
+
+# Installer
 composer install
-```
-
-### 2. Configuration
-
-```bash
 cp .env.example .env
 php artisan key:generate
-```
 
-Éditez `.env` avec vos credentials Neon :
-```env
-DB_CONNECTION=pgsql
-DB_HOST=votre-host.neon.tech
-DB_PORT=5432
-DB_DATABASE=neondb
-DB_USERNAME=neondb_owner
-DB_PASSWORD=votre_password
-DB_SSLMODE=require
-```
+# Configurer DB dans .env
+# DB_CONNECTION=pgsql
+# DB_HOST=your-host.neon.tech
 
-### 3. Base de données
-
-```bash
+# Migrer
 php artisan migrate
-php artisan passport:install
-php artisan db:seed --class=InitialDataSeeder
-```
+php artisan db:seed
 
-### 4. Démarrer
-
-```bash
+# Démarrer
 php artisan serve
-# API : http://127.0.0.1:8000
 ```
 
 ---
 
-## 🧪 Tester l'API
+## 📡 Endpoints
 
-```bash
-bash test-api.sh
+```http
+POST   /api/v1/login
+GET    /api/v1/clients
+POST   /api/v1/dettes
+GET    /api/v1/dashboard
 ```
+
+Documentation complète: `https://gestion-dette.laravel.cloud/api/documentation`
 
 ---
 
 ## 🔐 Credentials
 
-**Admin** : `admin` / `Admin@2024`
-**Boutiquier** : `boutiquier` / `Boutiquier@2024`
+| Rôle | Login | Password |
+|------|-------|----------|
+| Boutiquier | boutiquier | passer123 |
+| Admin | admin | Admin@2024 |
 
 ---
 
-## 🚀 Déploiement
+## 🌐 Déploiement
 
-### Koyeb (Recommandé - 100% Gratuit)
+Laravel Cloud déploie automatiquement depuis `main`.
 
-```bash
-bash deploy-koyeb.sh "Deploy to Koyeb"
-```
-
-- ✅ **100% Gratuit** (pas de CB)
-- ✅ Pas de sleep
-- ✅ SSL automatique
-
-Documentation : [DEPLOIEMENT_KOYEB.md](DEPLOIEMENT_KOYEB.md)
-
-### Render (Payant)
-
-```bash
-bash deploy.sh "Deploy to Render"
-```
-
-Documentation : [DEPLOIEMENT_RENDER.md](DEPLOIEMENT_RENDER.md)
+Variables d'environnement requises:
+- `DB_*` (Neon Database)
+- `APP_KEY`, `APP_URL`
+- `FRONTEND_URL`
 
 ---
 
-## 📡 Endpoints Principaux
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/api/v1/login` | Connexion |
-| GET | `/api/v1/dashboard` | Statistiques |
-| GET | `/api/v1/clients` | Liste clients |
-| GET | `/api/v1/articles` | Liste articles |
-| GET | `/api/v1/dettes` | Liste dettes |
-
----
-
-## 🔧 Dépannage
-
-Voir [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
----
-
-**Version** : 1.0.0
+**Version:** 1.0.0 | **Auteur:** TheShvdow | **Licence:** MIT

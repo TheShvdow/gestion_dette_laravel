@@ -6,22 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public $withinTransaction = false;
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('dettes', function (Blueprint $table) {
-            $table->id();
+           $table->id();
             $table->date('date');
             $table->decimal('montant', 10, 2);
             $table->decimal('montantDu', 10, 2);
             $table->decimal('montantRestant', 10, 2);
+            $table->string('status')->default('NON_SOLDE')->after('article_details');
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->json('article_details'); // Champ pour stocker les articles (quantité, prix, libellé)
             $table->timestamps();
         });
-        
     }
 
     /**

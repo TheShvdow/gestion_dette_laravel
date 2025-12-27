@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // Purge expired Passport tokens daily at 3:00 AM
-        $schedule->command('passport:purge')->daily()->at('03:00');
+        $schedule->command('sanctum:purge')->daily()->at('03:00');
     }
 
     /**
